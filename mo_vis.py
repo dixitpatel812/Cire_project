@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import mopy as mo
 
 #########################
-results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/present/"
+results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/heat/"
 #########################
 
 total_energy = pd.read_csv(os.path.join(results_folder_path, "total_energy.csv"), index_col = "tech")
