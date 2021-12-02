@@ -10,22 +10,18 @@ import math
 file_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/demand_data/"
 file_name = "2030_time_series.csv"
 data = pd.read_csv(os.path.join(file_path, file_name), index_col="time", parse_dates=True)
-tech_name = np.array(["heat_boiler_gas", "heat_pump_heat", "heat_storage_charging","heat_boiler_oil", "demand_heat", "heat_storage_discharging"
-                           , "steam_reforming", "electrolyser_hydrogen", "hydrogen_storage_charging", "demand_hydrogen","hydrogen_to_electricity_hydrogen", "hydrogen_storage_discharging"
-                           , "natural_gas", "lignite_coal", "hard_coal", "oil", "hydro_storage_charging", "battery_storage_charging", "hydropower", "biomass", "wind_onshore", "wind_offshore", "solar"
-                           ,"hydrogen_to_electricity_ele","electrolyser_ele", "battery_storage_discharging", "hydro_storage_discharging", "demand_ele", "re_gen_ele", "nre_gen_ele"] )
 
 cost = pd.DataFrame()
 
 #########################
 min_emission = 158668874
-results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/test_three/"
+results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/test_four/"
 #########################
 
 ###generator["p_nom", "marginal_cost", "efficiency", "capital_cost", "p_nom_max"]
-gen_solar = mo.gen_data(110000, 0, 1, 550000, "inf")
-gen_wind_off = mo.gen_data(22000, 0, 1, 1100000, "inf")
-gen_wind_on = mo.gen_data(90000, 0, 1, 2100000, "inf")
+gen_solar = mo.gen_data(130000, 0, 1, 550000, 170000)
+gen_wind_off = mo.gen_data(28000, 0, 1, 1100000, 50000)
+gen_wind_on = mo.gen_data(102000, 0, 1, 2100000, 122000)
 gen_biomass = mo.gen_data(8200, 75.8, 0.4, 2200000, 8200)
 gen_hydro = mo.gen_data(4800, 0, .88, 2200000, 4800)
 gen_lignite = mo.gen_data(9000, 44.9, 0.485, 2200000, 9000)
@@ -45,32 +41,33 @@ gen_boi_gas = mo.gen_data(58000, 44.9, .94, 387000, 65200)
 
 ###here efficincyies are considred as sqrt(actual efficiency)
 ###store["e_nom", "marginal_cost", "standing_loss", "capital_cost", "e_nom_max", "efficiency"]
-store_battery = mo.sto_data(0, 0, .007, 950000, "inf", math.sqrt(.98))
-store_hydro = mo.sto_data(0, 0, 0, 30000, "inf", math.sqrt(.8))
+store_battery = mo.sto_data(122.2, 0, .007, 950000, 15000, math.sqrt(.98))
+store_hydro = mo.sto_data(11000, 0, 0, 30000, 14000, math.sqrt(.8))
 
-store_hydrogen = mo.sto_data(0, 0, 0, 310000, "inf", math.sqrt(.40))
+store_hydrogen = mo.sto_data(1000, 0, 0, 310000, 5000, math.sqrt(.40))
 
 # store_heat = mo.sto_data(3000, .24, 0.2, 5.5, 5000, math.sqrt())
-store_heat = mo.sto_data(0, 0, 0.001, 55000, "inf", math.sqrt(.98))
+store_heat = mo.sto_data(3000, 0, 0.001, 55000, 20000, math.sqrt(.98))
 
 
 ###link["p_nom", "marginal_cost", "efficiency", "capital_cost", "p_nom_max"]
-link_bat_c = mo.link_data(0, 0, store_battery["efficiency"], 0, "inf")
-link_bat_d = mo.link_data(0, 0, store_battery["efficiency"], 0, "inf")
 
-link_hydro_c = mo.link_data(0, 0, store_hydro["efficiency"], 0, "inf")
-link_hydro_d = mo.link_data(0, 0, store_hydro["efficiency"], 0, "inf")
+link_bat_c = mo.link_data(0, 0, store_battery["efficiency"], 0, store_battery["e_nom_max"] / store_battery["efficiency"])
+link_bat_d = mo.link_data(0, 0, store_battery["efficiency"], 0, store_battery["e_nom_max"] / store_battery["efficiency"])
 
-link_h2_c = mo.link_data(0, 0, store_hydrogen["efficiency"], 0, "inf")
-link_h2_d = mo.link_data(0, 0, store_hydrogen["efficiency"], 0, "inf")
+link_hydro_c = mo.link_data(0, 0, store_hydro["efficiency"], 0, store_hydro["e_nom_max"] / store_hydro["efficiency"])
+link_hydro_d = mo.link_data(0, 0, store_hydro["efficiency"], 0, store_hydro["e_nom_max"] / store_hydro["efficiency"])
 
-link_ele = mo.link_data(0, 15.2, .71, 1137000, "inf")
-link_h2e = mo.link_data(500, 0.0, .8, 1000000, "inf")
+link_h2_c = mo.link_data(0, 0, store_hydrogen["efficiency"], 0, store_hydrogen["e_nom_max"] / store_hydrogen["efficiency"])
+link_h2_d = mo.link_data(0, 0, store_hydrogen["efficiency"], 0, store_hydrogen["e_nom_max"] / store_hydrogen["efficiency"])
 
-link_heat_c = mo.link_data(0, 0, store_heat["efficiency"], 0, "inf")
-link_heat_d = mo.link_data(0, 0, store_heat["efficiency"], 0, "inf")
+link_ele = mo.link_data(5000, 15.2, .71, 1137000, 15000)
+link_h2e = mo.link_data(500, 0.0, .8, 1000000, 1000)
 
-link_heat_pump = mo.link_data(32000, 0.0, 1.84, 2161000, "inf")
+link_heat_c = mo.link_data(0, 0, store_heat["efficiency"], 0, store_heat["e_nom_max"] / store_heat["efficiency"])
+link_heat_d = mo.link_data(0, 0, store_heat["efficiency"], 0, store_heat["e_nom_max"] / store_heat["efficiency"])
+
+link_heat_pump = mo.link_data(32000, 0.0, 1.84, 2161000, 105000)
 
 #####################################################################################
 
@@ -99,16 +96,16 @@ n.add("Generator", "wind_offshore", p_nom=gen_wind_off["p_nom"], bus="electricit
       p_nom_max=gen_wind_off["p_nom_max"], p_max_pu=data['wind_offshore_profile'], efficiency=gen_wind_off["efficiency"], capital_cost=gen_wind_off["capital_cost"])
 n.add("Generator", "wind_onshore", p_nom=gen_wind_on["p_nom"], bus="electricity", marginal_cost=gen_wind_on["marginal_cost"], p_nom_extendable=True,
       p_nom_max=gen_wind_on["p_nom_max"], p_max_pu=data['wind_onshore_profile'], efficiency=gen_wind_on["efficiency"], capital_cost=gen_wind_on["capital_cost"])
-n.add("Generator", "biomass", p_nom=gen_biomass["p_nom"], bus="electricity", marginal_cost=gen_biomass["marginal_cost"], p_nom_extendable=True, efficiency=gen_biomass["efficiency"])
-n.add("Generator", "hydropower", p_nom=gen_hydro["p_nom"], bus="electricity", marginal_cost=gen_hydro["marginal_cost"], p_nom_extendable=True,
+n.add("Generator", "biomass", p_nom=gen_biomass["p_nom"], bus="electricity", marginal_cost=gen_biomass["marginal_cost"], p_nom_extendable=True, efficiency=gen_biomass["efficiency"], capital_cost=gen_biomass["capital_cost"], p_nom_max=gen_biomass["p_nom_max"])
+n.add("Generator", "hydropower", p_nom=gen_hydro["p_nom"], bus="electricity", marginal_cost=gen_hydro["marginal_cost"], p_nom_extendable=True, capital_cost=gen_hydro["capital_cost"], p_nom_max=gen_hydro["p_nom_max"],
       efficiency=gen_hydro["efficiency"])
-n.add("Generator", "lignite_coal", p_nom=gen_lignite["p_nom"], bus="electricity", marginal_cost=gen_lignite["marginal_cost"], carrier="Lignite",
+n.add("Generator", "lignite_coal", p_nom=gen_lignite["p_nom"], bus="electricity", marginal_cost=gen_lignite["marginal_cost"], carrier="Lignite", capital_cost=gen_lignite["capital_cost"], p_nom_max=gen_lignite["p_nom_max"],
       p_nom_extendable=True, efficiency=gen_lignite["efficiency"])
-n.add("Generator", "hard_coal", p_nom=gen_hard_cole["p_nom"], bus="electricity", marginal_cost=gen_hard_cole["marginal_cost"], carrier="Hard_coal",
+n.add("Generator", "hard_coal", p_nom=gen_hard_cole["p_nom"], bus="electricity", marginal_cost=gen_hard_cole["marginal_cost"], carrier="Hard_coal", capital_cost=gen_hard_cole["capital_cost"], p_nom_max=gen_hard_cole["p_nom_max"],
       p_nom_extendable=True, efficiency=gen_hard_cole["efficiency"])
-n.add("Generator", "natural_gas", p_nom=gen_natural_gas["p_nom"], bus="electricity", marginal_cost=gen_natural_gas["marginal_cost"], carrier="Gas",
+n.add("Generator", "natural_gas", p_nom=gen_natural_gas["p_nom"], bus="electricity", marginal_cost=gen_natural_gas["marginal_cost"], carrier="Gas", capital_cost=gen_natural_gas["capital_cost"], p_nom_max=gen_natural_gas["p_nom_max"],
       p_nom_extendable=True, efficiency=gen_natural_gas["efficiency"])
-n.add("Generator", "oil", p_nom=gen_oil["p_nom"], bus="electricity", marginal_cost=gen_oil["marginal_cost"], carrier="Oil", p_nom_extendable=True,
+n.add("Generator", "oil", p_nom=gen_oil["p_nom"], bus="electricity", marginal_cost=gen_oil["marginal_cost"], carrier="Oil", p_nom_extendable=True, capital_cost=gen_oil["capital_cost"], p_nom_max=gen_oil["p_nom_max"],
       efficiency=gen_oil["efficiency"])
 
 n.add("Load", "electricity_demand", bus="electricity", p_set=data["elec_demand"])
@@ -205,10 +202,10 @@ max_emission = 8760 * (gen_steam_reforming["p_nom"]*carrier["gas"]/gen_steam_ref
                        gen_lignite["p_nom"]*carrier["lignite"]/gen_lignite["efficiency"])
 
 # i = 18000000
-#
+#110000000
 i = max_emission // 4
 
-i_i = max_emission // 4
+i_i = i
 # i = 100000000
 # print(max_emission)
 dif = 10000000
@@ -296,14 +293,14 @@ while i > 10000000:
 
 
     i = int(i) - dif
+    total_energy.index.name = "tech"
+    opt.index.name = "tech"
+    cost.index.name = "tech"
+    total_energy.to_csv(os.path.join(results_folder_path, "total_energy.csv"))
+    opt.to_csv(os.path.join(results_folder_path, "opt.csv"))
+    cost.to_csv(os.path.join(results_folder_path, "cost.csv"))
+    total_cost = cost.sum(axis=0)
+    total_cost.to_csv(os.path.join(results_folder_path, "total_cost.csv"))
     # break
 
 
-total_energy.index.name = "tech"
-opt.index.name = "tech"
-cost.index.name = "tech"
-total_energy.to_csv(os.path.join(results_folder_path, "total_energy.csv"))
-opt.to_csv(os.path.join(results_folder_path, "opt.csv"))
-cost.to_csv(os.path.join(results_folder_path, "cost.csv"))
-total_cost = cost.sum(axis=0)
-total_cost.to_csv(os.path.join(results_folder_path, "total_cost.csv"))
