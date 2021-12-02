@@ -28,13 +28,13 @@ cost = pd.DataFrame()
 
 #########################
 min_emission = 158668874
-results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/test_two/"
+results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/test_three/"
 #########################
 
 ###generator["p_nom", "marginal_cost", "efficiency", "capital_cost", "p_nom_max"]
-gen_solar = mo.gen_data(110000, 0, 1, 550000, 170000)
-gen_wind_off = mo.gen_data(22000, 0, 1, 1100000, 28000)
-gen_wind_on = mo.gen_data(90000, 0, 1, 2100000, 102000)
+gen_solar = mo.gen_data(110000, 0, 1, 550000, "inf")
+gen_wind_off = mo.gen_data(22000, 0, 1, 1100000, "inf")
+gen_wind_on = mo.gen_data(90000, 0, 1, 2100000, "inf")
 gen_biomass = mo.gen_data(8200, 75.8, 0.4, 0, 8200)
 gen_hydro = mo.gen_data(4800, 0, .88, 0, 4000)
 gen_lignite = mo.gen_data(9000, 44.9, 0.485, 0, 9000)
@@ -54,32 +54,32 @@ gen_boi_gas = mo.gen_data(58000, 44.9, .94, 387000, 65200)
 
 ###here efficincyies are considred as sqrt(actual efficiency)
 ###store["e_nom", "marginal_cost", "standing_loss", "capital_cost", "e_nom_max", "efficiency"]
-store_battery = mo.sto_data(122.2, 0, .007, 950000, 15000, math.sqrt(.98))
-store_hydro = mo.sto_data(11000, 0, 0, 30000, 14000, math.sqrt(.8))
+store_battery = mo.sto_data(0, 0, .007, 950000, "inf", math.sqrt(.98))
+store_hydro = mo.sto_data(0, 0, 0, 30000, "inf", math.sqrt(.8))
 
-store_hydrogen = mo.sto_data(1000, 0, 0, 310000, 20000, math.sqrt(.40))
+store_hydrogen = mo.sto_data(0, 0, 0, 310000, "inf", math.sqrt(.40))
 
 # store_heat = mo.sto_data(3000, .24, 0.2, 5.5, 5000, math.sqrt())
-store_heat = mo.sto_data(3000, 0, 0.001, 55000, 20000, math.sqrt(.98))
+store_heat = mo.sto_data(0, 0, 0.001, 55000, "inf", math.sqrt(.98))
 
 
 ###link["p_nom", "marginal_cost", "efficiency", "capital_cost", "p_nom_max"]
-link_bat_c = mo.link_data(0, 0, store_battery["efficiency"], 0, store_battery["e_nom_max"] / store_battery["efficiency"])
-link_bat_d = mo.link_data(0, 0, store_battery["efficiency"], 0, store_battery["e_nom_max"] / store_battery["efficiency"])
+link_bat_c = mo.link_data(0, 0, store_battery["efficiency"], 0, "inf")
+link_bat_d = mo.link_data(0, 0, store_battery["efficiency"], 0, "inf")
 
-link_hydro_c = mo.link_data(0, 0, store_hydro["efficiency"], 0, store_hydro["e_nom_max"] / store_hydro["efficiency"])
-link_hydro_d = mo.link_data(0, 0, store_hydro["efficiency"], 0, store_hydro["e_nom_max"] / store_hydro["efficiency"])
+link_hydro_c = mo.link_data(0, 0, store_hydro["efficiency"], 0, "inf")
+link_hydro_d = mo.link_data(0, 0, store_hydro["efficiency"], 0, "inf")
 
-link_h2_c = mo.link_data(0, 0, store_hydrogen["efficiency"], 0, store_hydrogen["e_nom_max"] / store_hydrogen["efficiency"])
-link_h2_d = mo.link_data(0, 0, store_hydrogen["efficiency"], 0, store_hydrogen["e_nom_max"] / store_hydrogen["efficiency"])
+link_h2_c = mo.link_data(0, 0, store_hydrogen["efficiency"], 0, "inf")
+link_h2_d = mo.link_data(0, 0, store_hydrogen["efficiency"], 0, "inf")
 
-link_ele = mo.link_data(0, 15.2, .71, 1137000, 20000)
-link_h2e = mo.link_data(500, 0.0, .8, 1000000, 1000)
+link_ele = mo.link_data(0, 15.2, .71, 1137000, "inf")
+link_h2e = mo.link_data(500, 0.0, .8, 1000000, "inf")
 
-link_heat_c = mo.link_data(0, 0, store_heat["efficiency"], 0, store_heat["e_nom_max"] / store_heat["efficiency"])
-link_heat_d = mo.link_data(0, 0, store_heat["efficiency"], 0, store_heat["e_nom_max"] / store_heat["efficiency"])
+link_heat_c = mo.link_data(0, 0, store_heat["efficiency"], 0, "inf")
+link_heat_d = mo.link_data(0, 0, store_heat["efficiency"], 0, "inf")
 
-link_heat_pump = mo.link_data(32000, 0.0, 1.84, 2161000, 105000)
+link_heat_pump = mo.link_data(32000, 0.0, 1.84, 2161000, "inf")
 
 #####################################################################################
 
