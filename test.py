@@ -14,17 +14,8 @@ tech_name = np.array(["heat_boiler_gas", "heat_pump_heat", "heat_storage_chargin
                            , "steam_reforming", "electrolyser_hydrogen", "hydrogen_storage_charging", "demand_hydrogen","hydrogen_to_electricity_hydrogen", "hydrogen_storage_discharging"
                            , "natural_gas", "lignite_coal", "hard_coal", "oil", "hydro_storage_charging", "battery_storage_charging", "hydropower", "biomass", "wind_onshore", "wind_offshore", "solar"
                            ,"hydrogen_to_electricity_ele","electrolyser_ele", "battery_storage_discharging", "hydro_storage_discharging", "demand_ele", "re_gen_ele", "nre_gen_ele"] )
-# total_energy = pd.DataFrame()
-# opt = pd.DataFrame()
+
 cost = pd.DataFrame()
-
-# table_change = pd.DataFrame()
-
-
-###energy
-# hydrogen_energy = pd.DataFrame()
-# electron_energy = pd.DataFrame()
-# heat_energy = pd.DataFrame()
 
 #########################
 min_emission = 158668874
@@ -35,12 +26,12 @@ results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_
 gen_solar = mo.gen_data(110000, 0, 1, 550000, "inf")
 gen_wind_off = mo.gen_data(22000, 0, 1, 1100000, "inf")
 gen_wind_on = mo.gen_data(90000, 0, 1, 2100000, "inf")
-gen_biomass = mo.gen_data(8200, 75.8, 0.4, 0, 8200)
-gen_hydro = mo.gen_data(4800, 0, .88, 0, 4000)
-gen_lignite = mo.gen_data(9000, 44.9, 0.485, 0, 9000)
-gen_hard_cole = mo.gen_data(15000, 59.6, 0.51, 0, 15000)
-gen_natural_gas = mo.gen_data(66000, 68.1, 0.62, 0, 66000)
-gen_oil = mo.gen_data(1000, 163.3, 0.3, 0, 1000)
+gen_biomass = mo.gen_data(8200, 75.8, 0.4, 2200000, 8200)
+gen_hydro = mo.gen_data(4800, 0, .88, 2200000, 4800)
+gen_lignite = mo.gen_data(9000, 44.9, 0.485, 2200000, 9000)
+gen_hard_cole = mo.gen_data(15000, 59.6, 0.51, 2200000, 15000)
+gen_natural_gas = mo.gen_data(66000, 68.1, 0.62, 2200000, 66000)
+gen_oil = mo.gen_data(1000, 163.3, 0.3, 2200000, 1000)
 
 gen_steam_reforming = mo.gen_data(2250, 50.8, 0.83, 300000, 3000)
 
@@ -108,16 +99,16 @@ n.add("Generator", "wind_offshore", p_nom=gen_wind_off["p_nom"], bus="electricit
       p_nom_max=gen_wind_off["p_nom_max"], p_max_pu=data['wind_offshore_profile'], efficiency=gen_wind_off["efficiency"], capital_cost=gen_wind_off["capital_cost"])
 n.add("Generator", "wind_onshore", p_nom=gen_wind_on["p_nom"], bus="electricity", marginal_cost=gen_wind_on["marginal_cost"], p_nom_extendable=True,
       p_nom_max=gen_wind_on["p_nom_max"], p_max_pu=data['wind_onshore_profile'], efficiency=gen_wind_on["efficiency"], capital_cost=gen_wind_on["capital_cost"])
-n.add("Generator", "biomass", p_nom=gen_biomass["p_nom"], bus="electricity", marginal_cost=gen_biomass["marginal_cost"], p_nom_extendable=False, efficiency=gen_biomass["efficiency"])
-n.add("Generator", "hydropower", p_nom=gen_hydro["p_nom"], bus="electricity", marginal_cost=gen_hydro["marginal_cost"], p_nom_extendable=False,
+n.add("Generator", "biomass", p_nom=gen_biomass["p_nom"], bus="electricity", marginal_cost=gen_biomass["marginal_cost"], p_nom_extendable=True, efficiency=gen_biomass["efficiency"])
+n.add("Generator", "hydropower", p_nom=gen_hydro["p_nom"], bus="electricity", marginal_cost=gen_hydro["marginal_cost"], p_nom_extendable=True,
       efficiency=gen_hydro["efficiency"])
 n.add("Generator", "lignite_coal", p_nom=gen_lignite["p_nom"], bus="electricity", marginal_cost=gen_lignite["marginal_cost"], carrier="Lignite",
-      p_nom_extendable=False, efficiency=gen_lignite["efficiency"])
+      p_nom_extendable=True, efficiency=gen_lignite["efficiency"])
 n.add("Generator", "hard_coal", p_nom=gen_hard_cole["p_nom"], bus="electricity", marginal_cost=gen_hard_cole["marginal_cost"], carrier="Hard_coal",
-      p_nom_extendable=False, efficiency=gen_hard_cole["efficiency"])
+      p_nom_extendable=True, efficiency=gen_hard_cole["efficiency"])
 n.add("Generator", "natural_gas", p_nom=gen_natural_gas["p_nom"], bus="electricity", marginal_cost=gen_natural_gas["marginal_cost"], carrier="Gas",
-      p_nom_extendable=False, efficiency=gen_natural_gas["efficiency"])
-n.add("Generator", "oil", p_nom=gen_oil["p_nom"], bus="electricity", marginal_cost=gen_oil["marginal_cost"], carrier="Oil", p_nom_extendable=False,
+      p_nom_extendable=True, efficiency=gen_natural_gas["efficiency"])
+n.add("Generator", "oil", p_nom=gen_oil["p_nom"], bus="electricity", marginal_cost=gen_oil["marginal_cost"], carrier="Oil", p_nom_extendable=True,
       efficiency=gen_oil["efficiency"])
 
 n.add("Load", "electricity_demand", bus="electricity", p_set=data["elec_demand"])
@@ -166,7 +157,7 @@ n.add("Store", "hydrogen_storage", bus="hydrogen_store", e_cyclic=False,  e_nom 
 n.add("Link", "hydrogen_discharging", bus0="hydrogen_store", bus1="hydrogen", p_nom=link_h2_d["p_nom"], efficiency=link_h2_d["efficiency"],
       p_nom_extendable=True, marginal_cost=link_h2_d["marginal_cost"], p_nom_max=link_h2_d["p_nom_max"], capital_cost=link_h2_d["capital_cost"])
 
-n.add("Link", "hydrogen_to_electricity", bus0="hydrogen_store", bus1="electricity", p_nom=link_h2e["p_nom"], efficiency=link_h2e["efficiency"],
+n.add("Link", "hydrogen_to_electricity", bus0="hydrogen", bus1="electricity", p_nom=link_h2e["p_nom"], efficiency=link_h2e["efficiency"],
       p_nom_extendable=True, marginal_cost=link_h2e["marginal_cost"], p_nom_max=link_h2e["p_nom_max"], capital_cost=link_h2e["capital_cost"])
 
 ###heat
@@ -298,8 +289,8 @@ while i > 10000000:
 
     #cost####################################################################################################
 
-    if n.generators.loc["support_gen_ele", "p_nom_opt"] != 0 and n.generators.loc[
-        "support_gen_heat", "p_nom_opt"] != 0 and n.generators.loc["support_gen_hydrogen", "p_nom_opt"] != 0:
+    if n.generators.loc["support_gen_ele", "p_nom_opt"] != 0 or n.generators.loc[
+        "support_gen_heat", "p_nom_opt"] != 0 or n.generators.loc["support_gen_hydrogen", "p_nom_opt"] != 0:
         print("Error support_gen")
         i = 0
 
