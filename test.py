@@ -15,7 +15,7 @@ cost = pd.DataFrame()
 
 #########################
 min_emission = 158668874
-results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/test_four/"
+results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/test_six_two/"
 #########################
 
 ###generator["p_nom", "marginal_cost", "efficiency", "capital_cost", "p_nom_max"]
@@ -25,7 +25,7 @@ gen_wind_on = mo.gen_data(102000, 0, 1, 2100000, 122000)
 gen_biomass = mo.gen_data(8200, 75.8, 0.4, 2200000, 8200)
 gen_hydro = mo.gen_data(4800, 0, .88, 2200000, 4800)
 gen_lignite = mo.gen_data(9000, 44.9, 0.485, 2200000, 9000)
-gen_hard_cole = mo.gen_data(15000, 59.6, 0.51, 2200000, 15000)
+gen_hard_coal = mo.gen_data(15000, 59.6, 0.51, 2200000, 15000)
 gen_natural_gas = mo.gen_data(66000, 68.1, 0.62, 2200000, 66000)
 gen_oil = mo.gen_data(1000, 163.3, 0.3, 2200000, 1000)
 
@@ -42,11 +42,10 @@ gen_boi_gas = mo.gen_data(58000, 44.9, .94, 387000, 65200)
 ###here efficincyies are considred as sqrt(actual efficiency)
 ###store["e_nom", "marginal_cost", "standing_loss", "capital_cost", "e_nom_max", "efficiency"]
 store_battery = mo.sto_data(122.2, 0, .007, 950000, 15000, math.sqrt(.98))
-store_hydro = mo.sto_data(11000, 0, 0, 30000, 14000, math.sqrt(.8))
+store_hydro = mo.sto_data(11000, 0, 0, 3000000, 14000, math.sqrt(.8))
 
 store_hydrogen = mo.sto_data(1000, 0, 0, 310000, 5000, math.sqrt(.40))
 
-# store_heat = mo.sto_data(3000, .24, 0.2, 5.5, 5000, math.sqrt())
 store_heat = mo.sto_data(3000, 0, 0.001, 55000, 20000, math.sqrt(.98))
 
 
@@ -101,8 +100,8 @@ n.add("Generator", "hydropower", p_nom=gen_hydro["p_nom"], bus="electricity", ma
       efficiency=gen_hydro["efficiency"])
 n.add("Generator", "lignite_coal", p_nom=gen_lignite["p_nom"], bus="electricity", marginal_cost=gen_lignite["marginal_cost"], carrier="Lignite", capital_cost=gen_lignite["capital_cost"], p_nom_max=gen_lignite["p_nom_max"],
       p_nom_extendable=True, efficiency=gen_lignite["efficiency"])
-n.add("Generator", "hard_coal", p_nom=gen_hard_cole["p_nom"], bus="electricity", marginal_cost=gen_hard_cole["marginal_cost"], carrier="Hard_coal", capital_cost=gen_hard_cole["capital_cost"], p_nom_max=gen_hard_cole["p_nom_max"],
-      p_nom_extendable=True, efficiency=gen_hard_cole["efficiency"])
+n.add("Generator", "hard_coal", p_nom=gen_hard_coal["p_nom"], bus="electricity", marginal_cost=gen_hard_coal["marginal_cost"], carrier="Hard_coal", capital_cost=gen_hard_coal["capital_cost"], p_nom_max=gen_hard_coal["p_nom_max"],
+      p_nom_extendable=True, efficiency=gen_hard_coal["efficiency"])
 n.add("Generator", "natural_gas", p_nom=gen_natural_gas["p_nom"], bus="electricity", marginal_cost=gen_natural_gas["marginal_cost"], carrier="Gas", capital_cost=gen_natural_gas["capital_cost"], p_nom_max=gen_natural_gas["p_nom_max"],
       p_nom_extendable=True, efficiency=gen_natural_gas["efficiency"])
 n.add("Generator", "oil", p_nom=gen_oil["p_nom"], bus="electricity", marginal_cost=gen_oil["marginal_cost"], carrier="Oil", p_nom_extendable=True, capital_cost=gen_oil["capital_cost"], p_nom_max=gen_oil["p_nom_max"],
@@ -198,30 +197,32 @@ max_emission = 8760 * (gen_steam_reforming["p_nom"]*carrier["gas"]/gen_steam_ref
                        gen_boi_gas["p_nom"]*carrier["gas"]/gen_boi_gas["efficiency"] +
                        gen_oil["p_nom"]*carrier["oil"]/gen_oil["efficiency"] +
                        gen_boi_oil["p_nom"]*carrier["oil"]/gen_oil["efficiency"] +
-                       gen_hard_cole["p_nom"]*carrier["hard_coal"]/gen_hard_cole["efficiency"] +
+                       gen_hard_coal["p_nom"]*carrier["hard_coal"]/gen_hard_coal["efficiency"] +
                        gen_lignite["p_nom"]*carrier["lignite"]/gen_lignite["efficiency"])
-
-# i = 18000000
+# i = 166441431
+i = 150000000
 #110000000
-i = max_emission // 4
+# i = max_emission
+
+
 
 i_i = i
 # i = 100000000
 # print(max_emission)
-dif = 10000000
+dif = 8000000
 
 
 
-while i > 10000000:
+while i > 50000000:
     # Global constrains
     n.add("GlobalConstraint", "Co2_limit", type="primary_energy", carrier_attribute="co2_emissions", constant=i,
-          sense="<=")
+          sense="==")
 
     folder = str(int(i))
 
     results_folder = os.path.join(results_folder_path, folder)
 
-    n.lopf(n.snapshots, solver_name="gurobi_direct")
+    n.lopf(n.snapshots, solver_name="gurobi_direct", pyomo=False)
     n.export_to_csv_folder(results_folder)
 
     # print(n.generators)
@@ -235,7 +236,7 @@ while i > 10000000:
     sums = pd.DataFrame()
 
     sums = mo.ver(sums, n.generators_t.p.sum(axis=0), n.links_t.p0.sum(axis=0))
-    sums.columns = [str(round(int(i)/10e6,3)) + "M"]
+    sums.columns = [str(round(int(i)/10e5,3)) + "M"]
 
     if i == i_i:
         total_energy = sums
@@ -248,7 +249,7 @@ while i > 10000000:
     optimal = pd.DataFrame()
 
     optimal =  mo.ver(optimal, n.generators.loc[:, "p_nom_opt"], n.links.loc[:,"p_nom_opt"], n.stores.loc[:,"e_nom_opt"])
-    optimal.columns = [str(round(int(i)/10e6,3)) + "M"]
+    optimal.columns = [str(round(int(i)/10e5,3)) + "M"]
 
     if i == i_i:
         opt = optimal
@@ -265,23 +266,23 @@ while i > 10000000:
     ###gen###
     for j in n.generators_t.p.columns:
         if n.generators.loc[j, "p_nom_opt"] - n.generators.loc[j, "p_nom"] > 0:
-            cost.loc[j, str(round(int(i)/10e6,3)) + "M"] = n.generators.loc[j, "capital_cost"] * (n.generators.loc[j, "p_nom_opt"] - n.generators.loc[j, "p_nom"])
+            cost.loc[j, str(round(int(i)/10e5,3)) + "M"] = n.generators.loc[j, "capital_cost"] * (n.generators.loc[j, "p_nom_opt"] - n.generators.loc[j, "p_nom"])
         else:
-            cost.loc[j, str(round(int(i)/10e6,3)) + "M"] = 0
+            cost.loc[j, str(round(int(i)/10e5,3)) + "M"] = 0
 
     ###links###
     for j in n.links_t.p0.columns:
         if n.links.loc[j, "p_nom_opt"] - n.links.loc[j, "p_nom"] > 0:
-            cost.loc[j, str(round(int(i)/10e6,3)) + "M"] = n.links.loc[j, "capital_cost"] * (n.links.loc[j, "p_nom_opt"] - n.links.loc[j, "p_nom"])
+            cost.loc[j, str(round(int(i)/10e5,3)) + "M"] = n.links.loc[j, "capital_cost"] * (n.links.loc[j, "p_nom_opt"] - n.links.loc[j, "p_nom"])
         else:
-            cost.loc[j, str(round(int(i)/10e6,3)) + "M"] = 0
+            cost.loc[j, str(round(int(i)/10e5,3)) + "M"] = 0
 
     ###stores###
     for j in n.stores_t.p.columns:
         if n.stores.loc[j, "e_nom_opt"] - n.stores.loc[j, "e_nom"] > 0:
-            cost.loc[j, str(round(int(i)/10e6,3)) + "M"] = n.stores.loc[j, "capital_cost"] * (n.stores.loc[j, "e_nom_opt"] - n.stores.loc[j, "e_nom"])
+            cost.loc[j, str(round(int(i)/10e5,3)) + "M"] = n.stores.loc[j, "capital_cost"] * (n.stores.loc[j, "e_nom_opt"] - n.stores.loc[j, "e_nom"])
         else:
-            cost.loc[j, str(round(int(i)/10e6,3)) + "M"] = 0
+            cost.loc[j, str(round(int(i)/10e5,3)) + "M"] = 0
 
 
     #cost####################################################################################################
