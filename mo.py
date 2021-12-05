@@ -27,7 +27,7 @@ cost = pd.DataFrame()
 
 #########################
 min_emission = 158668874
-results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/present/"
+results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/heat/"
 #########################
 
 ###generator["p_nom", "marginal_cost", "efficiency", "capital_cost", "p_nom_max"]
@@ -72,7 +72,7 @@ link_hydro_d = mo.link_data(0, 0, store_hydro["efficiency"], 0, store_hydro["e_n
 link_h2_c = mo.link_data(0, 0, store_hydrogen["efficiency"], 0, store_hydrogen["e_nom_max"] / store_hydrogen["efficiency"])
 link_h2_d = mo.link_data(0, 0, store_hydrogen["efficiency"], 0, store_hydrogen["e_nom_max"] / store_hydrogen["efficiency"])
 
-link_ele = mo.link_data(0, 15.2, .71, 1.137, 5000)
+link_ele = mo.link_data(5000, 15.2, .71, 1.137, 10000)
 link_h2e = mo.link_data(500, 0.0, .8, 1.8, 1000)
 
 link_heat_c = mo.link_data(0, 0, store_heat["efficiency"], 0, store_heat["e_nom_max"] / store_heat["efficiency"])
