@@ -15,7 +15,7 @@ cost = pd.DataFrame()
 
 #########################
 min_emission = 158668874
-results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/test_six_two/"
+results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/test_six_three/"
 #########################
 
 ###generator["p_nom", "marginal_cost", "efficiency", "capital_cost", "p_nom_max"]
@@ -31,7 +31,7 @@ gen_oil = mo.gen_data(1000, 163.3, 0.3, 2200000, 1000)
 
 gen_steam_reforming = mo.gen_data(2250, 50.8, 0.83, 300000, 3000)
 
-gen_boi_oil = mo.gen_data(13000, 57.6, .85, 457000, 15100)
+gen_boi_oil = mo.gen_data(13000, 57.6, .85, 457000, 13000)
 gen_boi_gas = mo.gen_data(58000, 44.9, .94, 387000, 65200)
 
 ##### assumptions
@@ -200,7 +200,7 @@ max_emission = 8760 * (gen_steam_reforming["p_nom"]*carrier["gas"]/gen_steam_ref
                        gen_hard_coal["p_nom"]*carrier["hard_coal"]/gen_hard_coal["efficiency"] +
                        gen_lignite["p_nom"]*carrier["lignite"]/gen_lignite["efficiency"])
 # i = 166441431
-i = 150000000
+i = 78000000
 #110000000
 # i = max_emission
 
@@ -209,20 +209,20 @@ i = 150000000
 i_i = i
 # i = 100000000
 # print(max_emission)
-dif = 8000000
+dif = 200000
 
 
 
 while i > 50000000:
     # Global constrains
     n.add("GlobalConstraint", "Co2_limit", type="primary_energy", carrier_attribute="co2_emissions", constant=i,
-          sense="==")
+          sense="<=")
 
     folder = str(int(i))
 
     results_folder = os.path.join(results_folder_path, folder)
 
-    n.lopf(n.snapshots, solver_name="gurobi_direct", pyomo=False)
+    n.lopf(n.snapshots, solver_name="gurobi_direct")
     n.export_to_csv_folder(results_folder)
 
     # print(n.generators)
