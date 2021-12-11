@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import mopy as mo
 
 #########################
-results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/test_six_three/"
+results_folder_path = "/run/media/dixit/D8_HD/D/Study/SEM_2/Cire/moosces/output_folder/t1.1/"
 #########################
 
 total_energy = pd.read_csv(os.path.join(results_folder_path, "total_energy.csv"), index_col = "tech")
@@ -30,16 +30,16 @@ vis = total_energy.loc[["lignite_coal", "hard_coal", "natural_gas", "heat_pump" 
 
 #######################Electricity_generation##################################
 ####individual######
-for i in electron_p.index:
-    plt.plot(electron_p.columns, electron_p.loc[i, :], label=i)
-    plt.title(i)
-    plt.xlabel("CO2_emission limit")
-    plt.ylabel("MWh")
-    plt.xticks(electron_p.columns, rotation="vertical")
-    plt.subplots_adjust(bottom=.17)
-    # plt.savefig(os.path.join(results_folder_path, i + ".png"), dpi = 1200)
-    plt.savefig(os.path.join(results_folder_path, "ele" + i + ".png"))
-    plt.clf()
+# for i in electron_p.index:
+#     plt.plot(electron_p.columns, electron_p.loc[i, :], label=i)
+#     plt.title(i)
+#     plt.xlabel("CO2_emission limit")
+#     plt.ylabel("MWh")
+#     plt.xticks(electron_p.columns, rotation="vertical")
+#     plt.subplots_adjust(bottom=.17)
+#     # plt.savefig(os.path.join(results_folder_path, i + ".png"), dpi = 1200)
+#     plt.savefig(os.path.join(results_folder_path, "ele" + i + ".png"))
+#     plt.clf()
 #####individual######
 
 #####all in one######
@@ -65,16 +65,16 @@ plt.clf()
 #########################Electricity_consumption##################################
 
 #####individual######
-for i in electron_c.index:
-    plt.plot(electron_c.columns, electron_c.loc[i, :], label=i)
-    plt.title(i)
-    plt.xlabel("CO2_emission limit")
-    plt.ylabel("MWh")
-    plt.xticks(electron_c.columns, rotation="vertical")
-    plt.subplots_adjust(bottom=.17)
-    # plt.savefig(os.path.join(results_folder_path, i + ".png"), dpi = 1200)
-    plt.savefig(os.path.join(results_folder_path, "ele" + i + ".png"))
-    plt.clf()
+# for i in electron_c.index:
+#     plt.plot(electron_c.columns, electron_c.loc[i, :], label=i)
+#     plt.title(i)
+#     plt.xlabel("CO2_emission limit")
+#     plt.ylabel("MWh")
+#     plt.xticks(electron_c.columns, rotation="vertical")
+#     plt.subplots_adjust(bottom=.17)
+#     # plt.savefig(os.path.join(results_folder_path, i + ".png"), dpi = 1200)
+#     plt.savefig(os.path.join(results_folder_path, "ele" + i + ".png"))
+#     plt.clf()
     # break
 
 #####individual######
@@ -100,17 +100,17 @@ plt.clf()
 
 #######################Hydrogen##################################
 ###individual######
-for i in hydrogen_energy.index:
-    plt.plot(hydrogen_energy.columns, hydrogen_energy.loc[i, :], label=i)
-    plt.title(i)
-    plt.xlabel("CO2_emission limit")
-    plt.ylabel("MWh")
-    plt.xticks(hydrogen_energy.columns, rotation="vertical")
-    plt.subplots_adjust(bottom=.17)
-    # plt.savefig(os.path.join(results_folder_path, i + ".png"), dpi = 1200)
-    plt.savefig(os.path.join(results_folder_path, "h2" + i + ".png"))
-    plt.clf()
-#####individual######
+# for i in hydrogen_energy.index:
+#     plt.plot(hydrogen_energy.columns, hydrogen_energy.loc[i, :], label=i)
+#     plt.title(i)
+#     plt.xlabel("CO2_emission limit")
+#     plt.ylabel("MWh")
+#     plt.xticks(hydrogen_energy.columns, rotation="vertical")
+#     plt.subplots_adjust(bottom=.17)
+#     # plt.savefig(os.path.join(results_folder_path, i + ".png"), dpi = 1200)
+#     plt.savefig(os.path.join(results_folder_path, "h2" + i + ".png"))
+#     plt.clf()
+# #####individual######
 
 #####all in one######
 for i in hydrogen_energy.index:
@@ -133,16 +133,16 @@ plt.clf()
 
 #######################Heat##################################
 #####individual######
-for i in heat_energy.index:
-    plt.plot(heat_energy.columns, heat_energy.loc[i, :], label=i)
-    plt.title(i)
-    plt.xlabel("CO2_emission limit")
-    plt.ylabel("MWh")
-    plt.xticks(heat_energy.columns, rotation="vertical")
-    plt.subplots_adjust(bottom=.17)
-    # plt.savefig(os.path.join(results_folder_path, i + ".png"), dpi = 1200)
-    plt.savefig(os.path.join(results_folder_path, "heat" + i + ".png"))
-    plt.clf()
+# for i in heat_energy.index:
+#     plt.plot(heat_energy.columns, heat_energy.loc[i, :], label=i)
+#     plt.title(i)
+#     plt.xlabel("CO2_emission limit")
+#     plt.ylabel("MWh")
+#     plt.xticks(heat_energy.columns, rotation="vertical")
+#     plt.subplots_adjust(bottom=.17)
+#     # plt.savefig(os.path.join(results_folder_path, i + ".png"), dpi = 1200)
+#     plt.savefig(os.path.join(results_folder_path, "heat" + i + ".png"))
+#     plt.clf()
 #####individual######
 
 #####all in one######

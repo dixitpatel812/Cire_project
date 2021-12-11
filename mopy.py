@@ -24,7 +24,7 @@ import numpy as np
 
 
 def gen_data(*x):
-    y = {"p_nom": x[0], "marginal_cost":x[1], "efficiency":x[2], "capital_cost":x[3], "p_nom_max":x[4]}
+    y = {"p_nom": x[0], "marginal_cost":x[1], "efficiency":x[2], "capital_cost":x[3], "p_nom_max":x[4], "p_nom_min":x[5], "p_max_pu":x[6]}
     return y
 
 def sto_data(*z):
