@@ -23,7 +23,7 @@ clock = pd.DataFrame()
 
 ##########################################################
 i = 166000000
-results_folder_name = "t0.1"
+results_folder_name = "t2.3"
 dif = 30000000
 i_i = i
 ##########################################################
@@ -37,7 +37,7 @@ input_folder = path.join(input_folder_path,(results_folder_name + "/"))
 n = pypsa.Network()
 n.import_from_csv_folder(input_folder)
 
-while i > 50000000:
+while i > 5:
     time_clock_start = timeit.default_timer()
 
     # Global constrains
@@ -53,6 +53,26 @@ while i > 50000000:
     n.mremove("GlobalConstraint", ["Co2_limit"])
 
     # vis####################################################################################################
+
+
+    ########peak_values##############3
+    # e_peak = pd.DataFrame()
+    # h_peak = pd.DataFrame()
+    #                                            "2030-01-01 00:00:00+01:00"
+    # e_peak = mo.ver(e_peak, n.generators_t.loc["2030-01-26 06:00:00+01:00",:], n.links_t.loc["2030-01-26 06:00:00+01:00",:])
+    # h_peak = mo.ver(h_peak, n.generators_t.loc["2030-11-28 17:00:00+01:00",:], n.links_t.loc["2030-11-28 17:00:00+01:00",:])
+    #
+    # e_peak.columns = [str(round(int(i) / 10e5, 1)) + "M"]
+    # h_peak.columns = [str(round(int(i) / 10e5, 1)) + "M"]
+    #
+    # if i == i_i:
+    #     heat_peak = h_peak
+    #     elec_peak = e_peak
+    # else:
+    #     heat_peak = mo.hor(heat_peak, h_peak)
+    #     elec_peak = mo.hor(elec_peak, e_peak)
+    #
+    # ########peak_values##############3
 
     #######total energy#######
     sums = pd.DataFrame()
@@ -115,10 +135,16 @@ while i > 50000000:
         i = 0
 
     i = int(i) - dif
+
     total_energy.index.name = "tech"
+    # elec_peak.index.name = "tech"
+    # heat_peak.index.name = "tech"
     opt.index.name = "tech"
     cost.index.name = "tech"
+
     total_energy.to_csv(path.join(results_folder_path, "total_energy.csv"))
+    # elec_peak.to_csv(path.join(results_folder_path, "elec_peak.csv"))
+    # heat_peak.to_csv(path.join(results_folder_path, "heat_peak.csv"))
     opt.to_csv(path.join(results_folder_path, "opt.csv"))
     cost.to_csv(path.join(results_folder_path, "cost.csv"))
     total_cost = cost.sum(axis=0)
