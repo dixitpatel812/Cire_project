@@ -19,9 +19,10 @@ clock = pd.DataFrame()
 #####output =  566441431.4687587
 
 ##########################################################
-i = 166000000
-results_folder_name = "t0.1"
-dif = 30000000
+i = 180000000
+# results_folder_name = "new_0"
+results_folder_name = "old_0"
+dif = 20000000
 i_i = i
 ##########################################################
 
@@ -128,8 +129,10 @@ while i >= 0:
         "support_gen_heat", "p_nom_opt"] != 0 or n.generators.loc["support_gen_hydrogen", "p_nom_opt"] != 0:
         print("Error support_gen")
         i = 0
-
-    i = int(i) - dif
+    if i < 60000000:
+        i = int(i) - dif + 15000000
+    else:
+        i = int(i) - dif
 
     total_energy.index.name = "tech"
     elec_peak.index.name = "tech"
