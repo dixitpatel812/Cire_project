@@ -1,21 +1,3 @@
-# import os
-# import pandas as pd
-#
-# def gen_data(*x):
-#     y = {"p_nom": x[0], "marginal_cost":x[1], "efficiency":x[2], "capital_cost":x[3], "p_nom_max":x[4]}
-#     return y
-#
-# def sto_data(*z):
-#     y = {"e_nom":z[0], "marginal_cost":z[1], "standing_loss":z[2], "capital_cost":z[3], "e_nom_max":z[4], "lifetime":z[5], "build_year":z[6]}
-#     return y
-#
-# def link_data(*a):
-#     y = {"p_nom": a[0], "marginal_cost":a[1], "efficiency":a[2], "capital_cost":a[3], "p_nom_max":a[4]}
-#     return y
-
-
-
-
 import pypsa
 import os
 import pandas as pd
