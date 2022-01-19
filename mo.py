@@ -9,7 +9,7 @@ def cire(data_folder_name, co2_limit):
     :return:
     """
 
-    co2_limit = co2_limit * 10e6
+    co2_limit = co2_limit * int(10e6)
 
     # input folder
     input_folder_path = mo.path.join(mo.input_path, data_folder_name)
