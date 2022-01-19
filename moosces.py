@@ -21,7 +21,7 @@ clock = pd.DataFrame()
 ##########################################################
 i = 180000000
 # results_folder_name = "new_0"
-results_folder_name = "old_0"
+results_folder_name = "r_0.2"
 dif = 20000000
 i_i = i
 ##########################################################
@@ -82,6 +82,7 @@ while i >= 0:
         total_energy = mo.hor(total_energy, sums)
     #######total energy#######
 
+
     #######p_nom_opt#######
     optimal = pd.DataFrame()
 
@@ -95,7 +96,19 @@ while i >= 0:
         opt = mo.hor(opt, optimal)
     ########p_nom_opt######
 
-    # vis####################################################################################################
+
+    #######max energy#######
+    maxs = pd.DataFrame()
+    maxs = mo.ver(maxs, n.generators_t.p.max(axis=0), n.links_t.p0.max(axis=0), n.stores_t.e.max(axis=0))
+
+    maxs.columns = [str(round(int(i) / 10e5, 1)) + "M"]
+
+    if i == i_i:
+        max_energy = maxs
+    else:
+        max_energy = mo.hor(max_energy, maxs)
+    #######max energy#######
+
 
     # cost####################################################################################################
 
@@ -135,12 +148,14 @@ while i >= 0:
         i = int(i) - dif
 
     total_energy.index.name = "tech"
+    max_energy.index.name = "tech"
     elec_peak.index.name = "tech"
     heat_peak.index.name = "tech"
     opt.index.name = "tech"
     cost.index.name = "tech"
 
     total_energy.to_csv(path.join(results_folder_path, "total_energy.csv"))
+    max_energy.to_csv(path.join(results_folder_path, "max_energy.csv"))
     elec_peak.to_csv(path.join(results_folder_path, "elec_peak.csv"))
     heat_peak.to_csv(path.join(results_folder_path, "heat_peak.csv"))
     opt.to_csv(path.join(results_folder_path, "opt.csv"))
