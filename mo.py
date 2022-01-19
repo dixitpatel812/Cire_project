@@ -8,13 +8,13 @@ def cire(data_folder_name, co2_limit):
     :param co2_limit: int value (in millions) of maximum allowable limit of total co2 emission in a time period. (Ex: in our case, total CO2 emission in a year 2030 (hourly resolved))
     :return:
     """
-
+    # co2 limit is in millions
     co2_limit = co2_limit * int(10e6)
 
     # input folder
     input_folder_path = mo.path.join(mo.input_path, data_folder_name)
     if not mo.path.isdir(input_folder_path):
-        print("Error???? input_data_folder dose not exist")
+        print("Error!!!! input_data_folder dose not exist")
         return
 
     # output folder
@@ -32,7 +32,8 @@ def cire(data_folder_name, co2_limit):
 
     while co2_limit >= 0:
         # add global constraint
-        network.add("GlobalConstraint", "CO2_emission_limit", type="primary_energy", carrier_attribute="co2_emissions", constant=co2_limit, sense="<=")
+        network.add("GlobalConstraint", "CO2_emission_limit", type="primary_energy", carrier_attribute="co2_emissions",
+                    constant=co2_limit, sense="<=")
         network.lopf(network.snapshots, solver_name="gurobi_direct")
         network.export_to_csv_folder(result_folder_path)
         network.remove("GlobalConstraint", ["CO2_emission_limit"])
