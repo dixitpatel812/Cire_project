@@ -10,7 +10,7 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
     :param end_limit: stop limit of reduction
     :param m_factor: multiplication factor is 1000000
     :param output_data: (bool) if true, gives output. otherwise, no output.
-    :return:
+    :return: no return
     note: producing output of  both (start and end) limits
     """
     # start_limit as co2 limit at a point
