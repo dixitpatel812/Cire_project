@@ -2,25 +2,39 @@ import mopy as mo
 from pypsa import Network
 import pandas as pd
 
-heat_list = [['heat_boiler_oil', 'heat_boiler_gas'], ['heat_pump'], ["heat_storage"]]
-hydrogen_list = [['steam_reforming'], ['electrolyser'], ['hydrogen_storage']]
-electricity_list = [['solar', 'wind_offshore', 'wind_onshore', 'biomass', 'hydropower', 'lignite_coal', 'hard_coal', 'natural_gas'], ['heat_pump', 'electrolyser'], ['hydro_storage', 'battery_storage']]
+heat_list = [['heat_boiler_oil', 'heat_boiler_gas'], [["heat_charging"], ['heat_pump', "heat_discharging"]], ["heat_storage"]]
+hydrogen_list = [['steam_reforming'], [['hydrogen_charging', "hydrogen_fuel_cell"], ['electrolyser', "hydrogen_discharging"]], ['hydrogen_storage']]
+electricity_list = [['solar', 'wind_offshore', 'wind_onshore', 'biomass', 'hydropower', 'lignite_coal', 'hard_coal', 'natural_gas'], [['heat_pump', 'electrolyser', "battery_charging", "hydro_charging"], ["hydrogen_fuel_cell", "battery_discharging", "hydro_discharging"]], ['hydro_storage', 'battery_storage']]
 
 
-def opt(net, opt_col_name):
+def opt(net, col_name):
     """
     :param net: network
-    :param opt_col_name: name of the column
+    :param col_name: name of the column
     :return: data frame
     """
     o = pd.DataFrame()
     o = mo.ver(o, net.generators.loc[:, "p_nom_opt"], net.links.loc[:, "p_nom_opt"], net.stores.loc[:, "e_nom_opt"])
-    # o = o.loc[opt_file_list, :]
-    o.columns = [str(opt_col_name) + "Mt"]
+    o.columns = [str(col_name) + "Mt"]
     return o
 
 
-def energy(net, energy_list, ele=False):
+def file(df, col_name, col_sum=True):
+    """
+    input files and give a changed dataframe with index and column
+    :param df: dataframe
+    :param col_name: str
+    :param col_sum: allow to sum all the columns
+    :return: dataframe
+    """
+    if col_sum:
+        f = df.sum(axis=0)
+    f = mo.hor(pd.DataFrame(), f)
+    f.columns = [str(col_name) + "Mt"]
+    return f
+
+
+def energy(net, energy_list):
     """
     :param net: network
     :param energy_list: nested list [[generators], [links], [stores]] of a specific energy bus
@@ -34,20 +48,25 @@ def energy(net, energy_list, ele=False):
             e = mo.hor(e, net.generators_t.p.loc[:, i])
 
     # link
-    if ele:
-        for i in energy_list[1]:
-            if i in net.links_t.p0.columns:
-                e = mo.hor(e, -net.links_t.p0.loc[:, i])
-    else:
-        for i in energy_list[1]:
-            if i in net.links_t.p1.columns:
-                e = mo.hor(e, abs(net.links_t.p1.loc[:, i]))
+    # link_p0
+    for i in energy_list[1][0]:
+        if i in net.links_t.p0.columns:
+            e = mo.hor(e, -net.links_t.p0.loc[:, i])
+
+    # link_p0
+    for i in energy_list[1][1]:
+        if i in net.links_t.p1.columns:
+            e = mo.hor(e, -net.links_t.p1.loc[:, i])
 
     # storage
     for i in energy_list[2]:
         if i in net.stores_t.p.columns:
             e = mo.hor(e, net.stores_t.p.loc[:, i])
-
+        if i in net.stores_t.e.columns:
+            x = pd.DataFrame(index=e.index)
+            x = mo.hor(x, net.stores_t.e.loc[:, i])
+            x.columns = [i + "_energy"]
+            e = mo.hor(e, x)
     return e
 
 
@@ -67,6 +86,9 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
 
     # creating data frames
     opt_file = pd.DataFrame()
+    electricity_total = pd.DataFrame()
+    heat_total = pd.DataFrame()
+    hydrogen_total = pd.DataFrame()
 
     # input folder
     input_folder_path = mo.path.join(mo.input_path, data_folder_name)
@@ -74,7 +96,7 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
         print("Error!!!! input_data_folder dose not exist")
         return
 
-    #demand file
+    # demand file
     demand_file_path = mo.path.join(input_folder_path, "loads-p_set.csv")
     demand_df = pd.read_csv(demand_file_path, index_col="name", parse_dates=True)
 
@@ -106,15 +128,19 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
 
         # heat file
         heat = mo.hor(energy(network, heat_list), -demand_df.loc[:, "heat_demand"])
+        heat_total = mo.hor(heat_total, file(heat, col_name=co2_limit, col_sum=True))
         heat.to_csv(mo.path.join(result_files_folder_path, "heat.csv"))
 
         # hydrogen file
         hydrogen = energy(network, hydrogen_list)
+        hydrogen_total = mo.hor(hydrogen_total, file(hydrogen, col_name=co2_limit, col_sum=True))
         hydrogen.to_csv(mo.path.join(result_files_folder_path, "hydrogen.csv"))
 
         # electricity file
-        electricity = mo.hor(energy(network, electricity_list, ele=True), -demand_df.loc[:, "electricity_demand"])
+        electricity = mo.hor(energy(network, electricity_list), -demand_df.loc[:, "electricity_demand"])
+        electricity_total = mo.hor(electricity_total, file(electricity, col_name=co2_limit, col_sum=True))
         electricity.to_csv(mo.path.join(result_files_folder_path, "electricity.csv"))
+
         # opt file
         opt_file = mo.hor(opt_file, opt(network, co2_limit))
 
@@ -124,6 +150,9 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
         else:
             # if false then directly store the data that are important. (Ex: store, link and generators)
             pass
+
+        #costs
+
 
         # remove global constraint
         network.remove("GlobalConstraint", ["CO2_emission_limit"])
@@ -139,11 +168,10 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
 
     # saving opt file
     opt_file.to_csv(mo.path.join(common_result_files_folder_path, "opt.csv"))
+    hydrogen_total.to_csv(mo.path.join(common_result_files_folder_path, "hydrogen_total.csv"))
+    heat_total.to_csv(mo.path.join(common_result_files_folder_path, "heat_total.csv"))
+    electricity_total.to_csv(mo.path.join(common_result_files_folder_path, "electricity_total.csv"))
 
 
 if __name__ == "__main__":
-    # cire("old_t_0", start_limit=180, reduction=20, end_limit=80)
-    # cire("old_t_0", start_limit=20, reduction=5, end_limit=0)
-    cire("fi_0.0", start_limit=180, reduction=20, end_limit=80)
-    cire("fi_0.0", start_limit=20, reduction=5, end_limit=0)
-
+    cire("test", end_limit=150)
