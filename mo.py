@@ -6,6 +6,10 @@ heat_list = [['heat_boiler_oil', 'heat_boiler_gas'], [["heat_charging"], ['heat_
 hydrogen_list = [['steam_reforming'], [['hydrogen_charging', "hydrogen_fuel_cell"], ['electrolyser', "hydrogen_discharging"]], ['hydrogen_storage']]
 electricity_list = [['solar', 'wind_offshore', 'wind_onshore', 'biomass', 'hydropower', 'lignite_coal', 'hard_coal', 'natural_gas'], [['heat_pump', 'electrolyser', "battery_charging", "hydro_charging"], ["hydrogen_fuel_cell", "battery_discharging", "hydro_discharging"]], ['hydro_storage', 'battery_storage']]
 
+# heat_list = [['heat_boiler_oil', 'heat_boiler_gas'], [["heat_charging"], ['heat_pump', "heat_discharging"]], ["heat_storage"]]
+# hydrogen_list = [['steam_reforming'], [['hydrogen_charging'], ['electrolyser', "hydrogen_discharging"]], ['hydrogen_storage']]
+# electricity_list = [['solar', 'wind_offshore', 'wind_onshore', 'biomass', 'hydropower', 'lignite_coal', 'hard_coal', 'natural_gas'], [['heat_pump', 'electrolyser', "battery_charging", "hydro_charging"], ["battery_discharging", "hydro_discharging"]], ['hydro_storage', 'battery_storage']]
+
 
 def opt(net, col_name):
     """
@@ -32,6 +36,31 @@ def file(df, col_name, col_sum=True):
     f = mo.hor(pd.DataFrame(), f)
     f.columns = [str(col_name) + "Mt"]
     return f
+
+
+def costs(df, df_t, co2_limit, mc=False, st=False):
+    """
+    :param df: input dataframe
+    :param df_t: output dataframe
+    :param co2_limit: Co2 limit
+    :param mc: marginal cost allowable
+    :param st: storage allowable
+    :return:
+    """
+    cost = pd.DataFrame(index=df.index)
+    for j in df.index:
+        if mc:
+            marginal_cost = (df_t.loc[:, j] * df.loc[j, "marginal_cost"]).sum()
+            cost.loc[j, co2_limit] = df.loc[j, "capital_cost"] * (
+                        df.loc[j, "p_nom_opt"] - df.loc[j, "p_nom_min"]) + marginal_cost
+        else:
+            if st:
+                cost.loc[j, co2_limit] = df.loc[j, "capital_cost"] * (
+                        df.loc[j, "e_nom_opt"] - df.loc[j, "e_nom_min"])
+            else:
+                cost.loc[j, co2_limit] = df.loc[j, "capital_cost"] * (
+                        df.loc[j, "p_nom_opt"] - df.loc[j, "p_nom_min"])
+    return cost
 
 
 def energy(net, energy_list):
@@ -85,6 +114,7 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
     co2_limit = start_limit
 
     # creating data frames
+    cost = pd.DataFrame()
     opt_file = pd.DataFrame()
     electricity_total = pd.DataFrame()
     heat_total = pd.DataFrame()
@@ -151,8 +181,11 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
             # if false then directly store the data that are important. (Ex: store, link and generators)
             pass
 
-        #costs
-
+        # costs
+        c = costs(network.generators, network.generators_t.p, str(co2_limit), mc=True)
+        c = mo.ver(c, costs(network.links, network.links_t.p0, str(co2_limit), mc=False))
+        c = mo.ver(c, costs(network.stores, network.stores_t.p, str(co2_limit), mc=False, st=True))
+        cost = mo.hor(cost, c)
 
         # remove global constraint
         network.remove("GlobalConstraint", ["CO2_emission_limit"])
@@ -171,7 +204,8 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
     hydrogen_total.to_csv(mo.path.join(common_result_files_folder_path, "hydrogen_total.csv"))
     heat_total.to_csv(mo.path.join(common_result_files_folder_path, "heat_total.csv"))
     electricity_total.to_csv(mo.path.join(common_result_files_folder_path, "electricity_total.csv"))
+    cost.to_csv(mo.path.join(common_result_files_folder_path, "cost.csv"))
 
 
 if __name__ == "__main__":
-    cire("test", end_limit=150)
+    cire("fi_1.0")
