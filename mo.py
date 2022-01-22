@@ -2,14 +2,6 @@ import mopy as mo
 from pypsa import Network
 import pandas as pd
 
-heat_list = [['heat_boiler_oil', 'heat_boiler_gas'], [["heat_charging"], ['heat_pump', "heat_discharging"]], ["heat_storage"]]
-hydrogen_list = [['steam_reforming'], [['hydrogen_charging', "hydrogen_fuel_cell"], ['electrolyser', "hydrogen_discharging"]], ['hydrogen_storage']]
-electricity_list = [['solar', 'wind_offshore', 'wind_onshore', 'biomass', 'hydropower', 'lignite_coal', 'hard_coal', 'natural_gas'], [['heat_pump', 'electrolyser', "battery_charging", "hydro_charging"], ["hydrogen_fuel_cell", "battery_discharging", "hydro_discharging"]], ['hydro_storage', 'battery_storage']]
-
-# heat_list = [['heat_boiler_oil', 'heat_boiler_gas'], [["heat_charging"], ['heat_pump', "heat_discharging"]], ["heat_storage"]]
-# hydrogen_list = [['steam_reforming'], [['hydrogen_charging'], ['electrolyser', "hydrogen_discharging"]], ['hydrogen_storage']]
-# electricity_list = [['solar', 'wind_offshore', 'wind_onshore', 'biomass', 'hydropower', 'lignite_coal', 'hard_coal', 'natural_gas'], [['heat_pump', 'electrolyser', "battery_charging", "hydro_charging"], ["battery_discharging", "hydro_discharging"]], ['hydro_storage', 'battery_storage']]
-
 
 def opt(net, col_name):
     """
@@ -157,17 +149,18 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
             mo.mkdir(result_files_folder_path)
 
         # heat file
-        heat = mo.hor(energy(network, heat_list), -demand_df.loc[:, "heat_demand"])
+        heat = mo.hor(energy(network, mo.heat_list), -demand_df.loc[:, "heat_demand"])
         heat_total = mo.hor(heat_total, file(heat, col_name=co2_limit, col_sum=True))
         heat.to_csv(mo.path.join(result_files_folder_path, "heat.csv"))
 
         # hydrogen file
-        hydrogen = energy(network, hydrogen_list)
+        hydrogen = energy(network, mo.hydrogen_list)
         hydrogen_total = mo.hor(hydrogen_total, file(hydrogen, col_name=co2_limit, col_sum=True))
+        hydrogen["hydrogen_demand"] = -network.loads.loc["hydrogen_demand", "p_set"]
         hydrogen.to_csv(mo.path.join(result_files_folder_path, "hydrogen.csv"))
 
         # electricity file
-        electricity = mo.hor(energy(network, electricity_list), -demand_df.loc[:, "electricity_demand"])
+        electricity = mo.hor(energy(network, mo.electricity_list), -demand_df.loc[:, "electricity_demand"])
         electricity_total = mo.hor(electricity_total, file(electricity, col_name=co2_limit, col_sum=True))
         electricity.to_csv(mo.path.join(result_files_folder_path, "electricity.csv"))
 
