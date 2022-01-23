@@ -3,7 +3,7 @@ import mopy as mo
 import matplotlib.pyplot as plt
 import numpy as np
 
-bar_colour = ["b", "g", "k", "m", "c", "r"]
+bar_colour = ["b", "g", "k", "m", "c", "r", "pink", "orange", "yellow"]
 
 
 # heat
@@ -14,8 +14,8 @@ heat_colour = ["b-", "g--", "k:", "m+", "c--", "r:"]
 # hydrogen
 # hydrogen_in = ["electrolyser", "steam_reforming", "hydrogen_discharging"]
 # hydrogen_out = ["hydrogen_demand", "hydrogen_charging", "hydrogen_fuel_cell"]
-hydrogen_in = ["electrolyser", "steam_reforming", "hydrogen_dscharging"]
-hydrogen_out = ["hdrogen_demand", "hyrogen_charging", "hydogen_fuel_cell"]
+hydrogen_in = ["electrolyser", "team_reforming", "hydrogen_dscharging"]
+hydrogen_out = ["hydrogen_demand", "hyrogen_charging", "hydogen_fuel_cell"]
 hydrogen_colour = ["b-", "g--", "k:", "m-", "c--", "r:"]
 
 # electricity
@@ -79,22 +79,18 @@ def file_total(in_folder_path, energy_file_name, e_list_in, e_list_out, out_file
     df_in = cum_sum_file_total(df, e_list_in)
     df_out = cum_sum_file_total(df, e_list_out)
 
-    # print(df_in)
-    # print(df_out)
-
     X = np.arange(len(df_in.index))
     # lab = [df_in.columns[0]]
-    plt.bar(X - 0.15, df_in.loc[:, df_in.columns[0]], width=.25, color=bar_colour[0])
+    plt.bar(X - 0.15, df_in.loc[:, df_in.columns[0]], width=.25)
     for i in range(1, len(df_in.columns)):
-        plt.bar(X - 0.15, df_in.loc[:, df_in.columns[i]], width=.25, color=bar_colour[i], bottom=(df_in.loc[:, df_in.columns[:i]]).sum(axis=1))
-        print((df_in.loc[:, df_in.columns[:i-1]]).sum(axis=1))
+        plt.bar(X - 0.15, df_in.loc[:, df_in.columns[i]], width=.25, bottom=(df_in.loc[:, df_in.columns[:i]]).sum(axis=1))
         # lab.append(df_in.columns[i])
 
     X = np.arange(len(df_out.index))
     # lab = lab.append(df_out.columns[0])
-    plt.bar(X + 0.15, abs(df_out.loc[:, df_out.columns[0]]), width=.25, color=bar_colour[0])
+    plt.bar(X + 0.15, abs(df_out.loc[:, df_out.columns[0]]), width=.25)
     for i in range(1, len(df_out.columns)):
-        plt.bar(X + 0.15, abs(abs(df_out.loc[:, df_out.columns[i]])), width=.25, color=bar_colour[-i], bottom=abs((df_out.loc[:, df_out.columns[:i]]).sum(axis=1)))
+        plt.bar(X + 0.15, abs(abs(df_out.loc[:, df_out.columns[i]])), width=.25, bottom=abs((df_out.loc[:, df_out.columns[:i]]).sum(axis=1)))
         # lab.append(df_out.columns[i])
 
     plt.title(out_file_name)
@@ -102,8 +98,7 @@ def file_total(in_folder_path, energy_file_name, e_list_in, e_list_out, out_file
     plt.ylabel("annual energy in MWh")
     # plt.xticks(np.arange(len(df_in.index)+len(df_out.index)), np.arange(0, 180, 20))
     # plt.legend(lab)
-    plt.show()
-    # plt.savefig(mo.path.join(out_folder_path, out_file_name + ".png"), dpi=600)
+    plt.savefig(mo.path.join(out_folder_path, out_file_name + ".png"), dpi=600)
     plt.clf()
     # return
 
@@ -133,8 +128,10 @@ def vis(data_folder_name, line=False, bar=False):
         if not mo.path.isdir(common_result_files_folder_path):
             return
         file_total(common_result_files_folder_path, "heat_total.csv", heat_in, heat_out, "heat_total", common_result_files_folder_path)
+        file_total(common_result_files_folder_path, "hydrogen_total.csv", hydrogen_in, hydrogen_out, "hydrogen_total", common_result_files_folder_path)
+        file_total(common_result_files_folder_path, "electricity_total.csv", electricity_in, electricity_out, "electricity_total", common_result_files_folder_path)
 
 
 if __name__ == "__main__":
-    vis("fi_1.0", bar=True)
+    vis(mo.input_data_folder_name, line=True)
     # mo.input_data_folder_name

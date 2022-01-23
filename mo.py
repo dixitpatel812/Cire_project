@@ -201,4 +201,4 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
 
 
 if __name__ == "__main__":
-    cire("fi_1.0")
+    cire(mo.input_data_folder_name)
