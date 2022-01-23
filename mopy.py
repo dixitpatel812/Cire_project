@@ -26,4 +26,14 @@ def ver(*x):
 input_path = "/run/media/d8/D8_HD/D/Sem_3/Cire/moosces/input_folder/"
 output_path = "/run/media/d8/D8_HD/D/Sem_3/Cire/moosces/output_folder/"
 
-input_data_folder_name = "fi_0.0"
+input_data_folder_name = "fi_1.0"
+
+# with fuel cell
+heat_list = [['heat_boiler_oil', 'heat_boiler_gas'], [["heat_charging"], ['heat_pump', "heat_discharging"]], ["heat_storage"]]
+hydrogen_list = [['steam_reforming'], [['hydrogen_charging', "hydrogen_fuel_cell"], ['electrolyser', "hydrogen_discharging"]], ['hydrogen_storage']]
+electricity_list = [['solar', 'wind_offshore', 'wind_onshore', 'biomass', 'hydropower', 'lignite_coal', 'hard_coal', 'natural_gas', "oil"], [['heat_pump', 'electrolyser', "battery_charging", "hydro_charging"], ["hydrogen_fuel_cell", "battery_discharging", "hydro_discharging"]], ['hydro_storage', 'battery_storage']]
+
+# without fuel cell
+# heat_list = [['heat_boiler_oil', 'heat_boiler_gas'], [["heat_charging"], ['heat_pump', "heat_discharging"]], ["heat_storage"]]
+# hydrogen_list = [['steam_reforming'], [['hydrogen_charging'], ['electrolyser', "hydrogen_discharging"]], ['hydrogen_storage']]
+# electricity_list = [['solar', 'wind_offshore', 'wind_onshore', 'biomass', 'hydropower', 'lignite_coal', 'hard_coal', 'natural_gas'], [['heat_pump', 'electrolyser', "battery_charging", "hydro_charging"], ["battery_discharging", "hydro_discharging"]], ['hydro_storage', 'battery_storage']]
