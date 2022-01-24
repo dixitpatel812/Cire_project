@@ -3,37 +3,39 @@ import mopy as mo
 import matplotlib.pyplot as plt
 import numpy as np
 
-bar_colour = ["b", "g", "k", "m", "c", "r", "pink", "orange", "yellow"]
 
+bar_colour = ["b", "g", "k", "m", "c", "r", "pink", "orange", "yellow"]
+colour_list = ["black", "gray", "darkgrey", "silver","red", "green", "blue", "sienna", "orchid", "fuchsia", "salmon", "tomato", "peru", "khaki", "plum", "purple", "violet", "pink", "yellow"]
 
 # heat
-# heat_in = ["heat_pump", "heat_boiler_oil", "heat_boiler_gas", "heat_discharging"]
-# heat_out = ["heat_demand", "heat_charging"]
+heat_in = ["heat_pump", "heat_boiler_oil", "heat_boiler_gas", "eat_discharging"]
+heat_out = ["heat_demand", "eat_charging"]
 
 # only ch and di
-heat_in = ["heat_discharging"]
-heat_out = ["heat_charging"]
+# heat_in = ["heat_discharging"]
+# heat_out = ["heat_charging"]
 
 heat_colour = ["b-", "g--", "k:", "m+", "c--", "r:"]
 
 # hydrogen
-# hydrogen_in = ["electrolyser", "steam_reforming", "hydrogen_discharging"]
-# hydrogen_out = ["hydrogen_demand", "hydrogen_charging", "hydrogen_fuel_cell"]
+hydrogen_in = ["electrolyser", "steam_reforming", "ydrogen_discharging"]
+hydrogen_out = ["hydrogen_demand", "ydrogen_charging", "hydrogen_fuel_cell"]
 
 # only ch and di
-hydrogen_in = ["hydrogen_discharging"]
-hydrogen_out = ["hydrogen_charging"]
+# hydrogen_in = ["hydrogen_discharging"]
+# hydrogen_out = ["hydrogen_charging"]
+
 hydrogen_colour = ["b-", "g--", "k:", "m-", "c--", "r:"]
 
 # electricity
-# electricity_in = ['biomass', 'hydropower', 'solar', 'wind_offshore', 'wind_onshore', 'lignite_coal', 'hard_coal', 'natural_gas', "oil", "battery_discharging", "hydro_discharging", "hydrogen_fuel_cell"]
-# electricity_out = ['heat_pump', 'electrolyser', "", "electricity_demand", "battery_charging", "hydro_charging"]
+electricity_out = ['heat_pump', 'electrolyser', "", "electricity_demand", "battery_harging", "hydro_harging"]
+electricity_in = ['biomass', 'hydropower', 'solar', 'wind_offshore', 'wind_onshore', 'lignite_coal', 'hard_coal', 'natural_gas', "oil", "battery_ischarging", "hydro_ischarging", "hydrogen_fuel_cell"]
 
 # only ch and di
 # electricity_in = ["hydro_discharging"]
 # electricity_out = ["hydro_charging"]
-electricity_in = ["battery_discharging"]
-electricity_out = ["battery_charging"]
+# electricity_in = ["battery_discharging"]
+# electricity_out = ["battery_charging"]
 # electricity_colour = ["b-", "g--", "k:", "+m", "--c", ":r"]
 
 
@@ -106,28 +108,33 @@ def cum_sum_file_total(df, e_list):
 def file_total(in_folder_path, energy_file_name, e_list_in, e_list_out, out_file_name, out_folder_path, ele=False):
     df = pd.read_csv(mo.path.join(in_folder_path, energy_file_name), index_col=0)
 
+    c = 0
+
     df_in = cum_sum_file_total(df, e_list_in)
     df_out = cum_sum_file_total(df, e_list_out)
 
     X = np.arange(len(df_in.index))
     # lab = [df_in.columns[0]]
-    plt.bar(X - 0.15, df_in.loc[:, df_in.columns[0]], width=.25)
+    plt.bar(X - 0.15, df_in.loc[:, df_in.columns[0]], width=.25, label=df_in.columns[0])
     for i in range(1, len(df_in.columns)):
-        plt.bar(X - 0.15, df_in.loc[:, df_in.columns[i]], width=.25, bottom=(df_in.loc[:, df_in.columns[:i]]).sum(axis=1))
+        c = c+1
+        plt.bar(X - 0.15, df_in.loc[:, df_in.columns[i]], color=colour_list[c], width=.25, bottom=(df_in.loc[:, df_in.columns[:i]]).sum(axis=1), label=df_in.columns[i])
         # lab.append(df_in.columns[i])
 
     X = np.arange(len(df_out.index))
     # lab = lab.append(df_out.columns[0])
-    plt.bar(X + 0.15, abs(df_out.loc[:, df_out.columns[0]]), width=.25)
+    c = c+1
+    plt.bar(X + 0.15, abs(df_out.loc[:, df_out.columns[0]]), width=.25, label=df_out.columns[0])
     for i in range(1, len(df_out.columns)):
-        plt.bar(X + 0.15, abs(abs(df_out.loc[:, df_out.columns[i]])), width=.25, bottom=abs((df_out.loc[:, df_out.columns[:i]]).sum(axis=1)))
+        c = c+1
+        plt.bar(X + 0.15, abs(abs(df_out.loc[:, df_out.columns[i]])), width=.25, bottom=abs((df_out.loc[:, df_out.columns[:i]]).sum(axis=1)), label=df_out.columns[i])
         # lab.append(df_out.columns[i])
 
     plt.title(out_file_name)
     plt.xlabel("CO2 limit in Mtons")
     plt.ylabel("annual energy in MWh")
-    # plt.xticks(np.arange(len(df_in.index)+len(df_out.index)), np.arange(0, 180, 20))
-    # plt.legend(lab)
+    plt.xticks(np.arange(len(df_in.index)), df_in.index)
+    plt.legend(fontsize="xx-small")
     plt.savefig(mo.path.join(out_folder_path, out_file_name + ".png"), dpi=600)
     plt.clf()
     # return
@@ -177,5 +184,5 @@ def vis(data_folder_name, line=False, bar=False):
 
 
 if __name__ == "__main__":
-    vis(mo.input_data_folder_name, line=True)
-    # mo.input_data_folder_name
+    vis("fi_2.0", bar=True)
+    # mo.input_data_folder_name![](../moosces/output_folder/fi_2.0/results/electricity_total.png)
