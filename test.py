@@ -1,0 +1,45 @@
+import pandas as pd
+import mopy as mo
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+def vis_ind(data_frame, title, folder_path):
+    for i in data_frame.index:
+        plt.plot(data_frame.columns, data_frame.loc[i, :], label=i)
+        plt.title(title + "  " + i)
+        plt.xlabel("CO2_emission limit")
+        plt.ylabel("")
+        plt.xticks(data_frame.columns, rotation="vertical")
+        plt.subplots_adjust(bottom=.17)
+        plt.savefig(mo.path.join(folder_path, title + "_" + i + ".png"))
+        plt.clf()
+
+
+def vis_new(data_folder_name):
+    r_folder = mo.path.join(mo.output_path, data_folder_name, "results")
+
+    electricity = pd.read_csv(mo.path.join(r_folder, "electricity_total.csv"), index_col=0)
+    heat = pd.read_csv(mo.path.join(r_folder, "heat_total.csv"), index_col=0)
+    hydrogen = pd.read_csv(mo.path.join(r_folder, "hydrogen_total.csv"), index_col=0)
+    opt = pd.read_csv(mo.path.join(r_folder, "opt.csv"), index_col=0)
+
+    if not mo.path.isdir(mo.path.join(r_folder, "electricity_total_ind")):
+        mo.mkdir(mo.path.join(r_folder, "electricity_total_ind"))
+    vis_ind(electricity, "electricity_total", mo.path.join(r_folder, "electricity_total_ind"))
+
+    if not mo.path.isdir(mo.path.join(r_folder, "hydrogen_total_ind")):
+        mo.mkdir(mo.path.join(r_folder, "hydrogen_total_ind"))
+    vis_ind(hydrogen, "hydrogen_total", mo.path.join(r_folder, "hydrogen_total_ind"))
+
+    if not mo.path.isdir(mo.path.join(r_folder, "heat_total_ind")):
+        mo.mkdir(mo.path.join(r_folder, "heat_total_ind"))
+    vis_ind(heat, "heat_total", mo.path.join(r_folder, "heat_total_ind"))
+
+    if not mo.path.isdir(mo.path.join(r_folder, "opt_ind")):
+        mo.mkdir(mo.path.join(r_folder, "opt_ind"))
+    vis_ind(opt, "opt", mo.path.join(r_folder, "opt_ind"))
+
+
+if __name__ == "__main__":
+    vis_new("fi_2.0.1")

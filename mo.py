@@ -164,6 +164,7 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
         electricity_total = mo.hor(electricity_total, file(electricity, col_name=co2_limit, col_sum=True))
         electricity.to_csv(mo.path.join(result_files_folder_path, "electricity.csv"))
 
+
         # opt file
         opt_file = mo.hor(opt_file, opt(network, co2_limit))
 
