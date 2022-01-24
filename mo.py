@@ -155,8 +155,8 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
 
         # hydrogen file
         hydrogen = energy(network, mo.hydrogen_list)
-        hydrogen_total = mo.hor(hydrogen_total, file(hydrogen, col_name=co2_limit, col_sum=True))
         hydrogen["hydrogen_demand"] = -network.loads.loc["hydrogen_demand", "p_set"]
+        hydrogen_total = mo.hor(hydrogen_total, file(hydrogen, col_name=co2_limit, col_sum=True))
         hydrogen.to_csv(mo.path.join(result_files_folder_path, "hydrogen.csv"))
 
         # electricity file
