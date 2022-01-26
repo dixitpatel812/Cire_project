@@ -42,6 +42,26 @@ electricity_in = ['biomass', 'hydropower', 'solar', 'wind_offshore', 'wind_onsho
 opt_file = ['solar', 'wind_offshore', 'wind_onshore', 'steam_reforming', 'support_gen_ele', 'electrolyser', 'heat_pump', 'battery_storage', 'hydro_storage', 'hydrogen_storage', 'heat_storage', 'battery_charging', 'battery_discharging', 'hydro_charging', 'hydro_discharging', 'hydrogen_charging', 'hydrogen_discharging', 'heat_charging', 'heat_discharging']
 
 
+def vis_total_energy_bar(data_folder_name):
+    common_result_files_folder_path = mo.path.join(mo.output_path, data_folder_name, "results")
+    if not mo.path.isdir(common_result_files_folder_path):
+        print("not found result folder")
+        print("exit!!")
+        return
+    if not mo.path.isdir(mo.path.join(common_result_files_folder_path, "bar_graph_total")):
+        mo.mkdir(mo.path.join(common_result_files_folder_path, "bar_graph_total"))
+        print("creating bar_graph_total folder")
+    file_total(common_result_files_folder_path, "heat_total.csv", heat_in, heat_out, "heat_total",
+               mo.path.join(common_result_files_folder_path, "bar_graph_total"))
+    print("created heat_total bar graph")
+    file_total(common_result_files_folder_path, "hydrogen_total.csv", hydrogen_in, hydrogen_out, "hydrogen_total",
+               mo.path.join(common_result_files_folder_path, "bar_graph_total"))
+    print("created hydrogen_total bar graph")
+    file_total(common_result_files_folder_path, "electricity_total.csv", electricity_in, electricity_out,
+               "electricity_total", mo.path.join(common_result_files_folder_path, "bar_graph_total"))
+    print("created electricity_total bar graph")
+
+
 def cum_sum_file(df, e_list):
     df_new = pd.DataFrame()
 
@@ -140,7 +160,7 @@ def file_total(in_folder_path, energy_file_name, e_list_in, e_list_out, out_file
     # return
 
 
-def vis(data_folder_name, line=False, bar=False):
+def vis(data_folder_name, line=False):
     if line:
         if mo.path.isdir(mo.path.join(mo.output_path, data_folder_name)):
             if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "electricity_bus")):
@@ -164,8 +184,8 @@ def vis(data_folder_name, line=False, bar=False):
 
                 # entire year
                 # file_hourly(result_files_folder_path, "electricity.csv", electricity_in, electricity_out, folder + "_electricity_bus", mo.path.join(mo.output_path, data_folder_name, "results", "electricity_one_day"), ele=True)
-                file_hourly(result_files_folder_path, "heat.csv", heat_in, heat_out, folder + "_heat_bus", mo.path.join(mo.output_path, data_folder_name, "results", "heat_one_day"))
-                file_hourly(result_files_folder_path, "hydrogen.csv", hydrogen_in, hydrogen_out, folder + "_hydrogen_bus", mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_one_day"))
+                # file_hourly(result_files_folder_path, "heat.csv", heat_in, heat_out, folder + "_heat_bus", mo.path.join(mo.output_path, data_folder_name, "results", "heat_one_day"))
+                # file_hourly(result_files_folder_path, "hydrogen.csv", hydrogen_in, hydrogen_out, folder + "_hydrogen_bus", mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_one_day"))
 
                 # one day
                 # file_hourly(result_files_folder_path, "electricity.csv", electricity_in, electricity_out, folder + "_electricity", mo.path.join(mo.output_path, data_folder_name, "results", "electricity_bus"), ele=True, time_step=True, time_slot=pd.date_range("2030-06-01", freq="H", periods=24, tz='Europe/Berlin'))
@@ -174,15 +194,12 @@ def vis(data_folder_name, line=False, bar=False):
         else:
             print("Error!!! output folder path dose not exits")
             return
-    if bar:
-        common_result_files_folder_path = mo.path.join(mo.output_path, data_folder_name, "results")
-        if not mo.path.isdir(common_result_files_folder_path):
-            return
-        file_total(common_result_files_folder_path, "heat_total.csv", heat_in, heat_out, "heat_total", common_result_files_folder_path)
-        file_total(common_result_files_folder_path, "hydrogen_total.csv", hydrogen_in, hydrogen_out, "hydrogen_total", common_result_files_folder_path)
-        file_total(common_result_files_folder_path, "electricity_total.csv", electricity_in, electricity_out, "electricity_total", common_result_files_folder_path)
 
 
 if __name__ == "__main__":
-    vis("fi_2.0", bar=True)
-    # mo.input_data_folder_name![](../moosces/output_folder/fi_2.0/results/electricity_total.png)
+
+    # vis
+    vis("fi_3.0.1", bar=True)
+
+    # total bar energy graph with logs
+    vis_total_energy_bar(mo.input_data_folder_name)
