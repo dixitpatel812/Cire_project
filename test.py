@@ -41,18 +41,25 @@ def vis_new(data_folder_name):
     #     mo.mkdir(mo.path.join(r_folder, "opt_ind"))
     # vis_ind(opt, "opt", mo.path.join(r_folder, "opt_ind"))
 
+
+    # cost plot
     plt.plot(cost.columns, cost.sum(axis=0)/1e9)
     plt.xlabel("CO2_emission limit")
     plt.ylabel("Total costs in billion Euro")
     plt.title("Cost of reducing the CO2 emissions")
-    plt.savefig(mo.path.join(r_folder, "cost.png"))
+    plt.savefig(mo.path.join(r_folder, "cost.png"), dpi=600)
     plt.clf()
     # plt.show
 
+    # area plot
+    # print(heat)
+    # plt.stackplot(heat.columns,  heat.iloc[[0, 1, 3], :], labels=["a", "b", "c"])
+    # plt.legend()
+    # plt.show()
 
 
 if __name__ == "__main__":
-    vis_new("fi_2.0")
+    vis_new("fi_3.0.1")
 
 
 
