@@ -91,8 +91,9 @@ def energy(net, energy_list):
     return e
 
 
-def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=10e5, output_data=True):
+def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=10e5, output_data=True, ones=False):
     """
+    :param ones: run only one time
     :param data_folder_name: name of the folder where input files are stored
     :param start_limit: int value (in millions) of maximum allowable limit of total co2 emission in a time period. (Ex: in our case, total CO2 emission in a year 2030 (hourly resolved))
     :param reduction: Co2 emission reduction
@@ -186,7 +187,8 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
 
         # loop condition variable
         co2_limit = co2_limit - reduction
-        break
+        if ones:
+            break
 
     # result files folder
     common_result_files_folder_path = mo.path.join(output_folder_path, "results")
