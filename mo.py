@@ -164,13 +164,13 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
         electricity_total = mo.hor(electricity_total, file(electricity, col_name=co2_limit, col_sum=True))
         electricity.to_csv(mo.path.join(result_files_folder_path, "electricity.csv"))
 
-
         # opt file
         opt_file = mo.hor(opt_file, opt(network, co2_limit))
 
         # store output data?
         if output_data:
-            network.export_to_csv_folder(result_folder_path)
+            pass
+            # network.export_to_csv_folder(result_folder_path)
         else:
             # if false then directly store the data that are important. (Ex: store, link and generators)
             pass
@@ -186,7 +186,7 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
 
         # loop condition variable
         co2_limit = co2_limit - reduction
-        # break
+        break
 
     # result files folder
     common_result_files_folder_path = mo.path.join(output_folder_path, "results")
@@ -202,4 +202,4 @@ def cire(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=
 
 
 if __name__ == "__main__":
-    cire(mo.input_data_folder_name, reduction=5)
+    cire("test", reduction=50)
