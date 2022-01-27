@@ -8,8 +8,8 @@ bar_colour = ["b", "g", "k", "m", "c", "r", "pink", "orange", "yellow"]
 colour_list = ["black", "gray", "darkgrey", "silver","red", "green", "blue", "sienna", "orchid", "fuchsia", "salmon", "tomato", "peru", "khaki", "plum", "purple", "violet", "pink", "yellow"]
 
 # heat
-heat_in = ["heat_pump", "heat_boiler_oil", "heat_boiler_gas", "eat_discharging"]
-heat_out = ["heat_demand", "eat_charging"]
+# heat_in = ["heat_pump", "heat_boiler_oil", "heat_boiler_gas", "heat_discharging"]
+# heat_out = ["heat_demand", "heat_charging"]
 
 # only ch and di
 # heat_in = ["heat_discharging"]
@@ -18,8 +18,8 @@ heat_out = ["heat_demand", "eat_charging"]
 heat_colour = ["b-", "g--", "k:", "m+", "c--", "r:"]
 
 # hydrogen
-hydrogen_in = ["electrolyser", "steam_reforming", "ydrogen_discharging"]
-hydrogen_out = ["hydrogen_demand", "ydrogen_charging", "hydrogen_fuel_cell"]
+# hydrogen_in = ["electrolyser", "steam_reforming", "ydrogen_discharging"]
+# hydrogen_out = ["hydrogen_demand", "ydrogen_charging", "hydrogen_fuel_cell"]
 
 # only ch and di
 # hydrogen_in = ["hydrogen_discharging"]
@@ -28,8 +28,8 @@ hydrogen_out = ["hydrogen_demand", "ydrogen_charging", "hydrogen_fuel_cell"]
 hydrogen_colour = ["b-", "g--", "k:", "m-", "c--", "r:"]
 
 # electricity
-electricity_out = ['heat_pump', 'electrolyser', "", "electricity_demand", "battery_harging", "hydro_harging"]
-electricity_in = ['biomass', 'hydropower', 'solar', 'wind_offshore', 'wind_onshore', 'lignite_coal', 'hard_coal', 'natural_gas', "oil", "battery_ischarging", "hydro_ischarging", "hydrogen_fuel_cell"]
+# electricity_out = ['heat_pump', 'electrolyser', "", "electricity_demand", "battery_harging", "hydro_harging"]
+# electricity_in = ['biomass', 'hydropower', 'solar', 'wind_offshore', 'wind_onshore', 'lignite_coal', 'hard_coal', 'natural_gas', "oil", "battery_ischarging", "hydro_ischarging", "hydrogen_fuel_cell"]
 
 # only ch and di
 # electricity_in = ["hydro_discharging"]
@@ -170,17 +170,30 @@ def vis(data_folder_name, line=False):
             if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "heat_bus")):
                 mo.mkdir(mo.path.join(mo.output_path, data_folder_name, "results", "heat_bus"))
 
-            if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "electricity_one_day")):
-                mo.mkdir(mo.path.join(mo.output_path, data_folder_name, "results", "electricity_one_day"))
-            if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_one_day")):
-                mo.mkdir(mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_one_day"))
-            if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "heat_one_day")):
-                mo.mkdir(mo.path.join(mo.output_path, data_folder_name, "results", "heat_one_day"))
+            # Ch and Di
+            if mo.path.isdir(mo.path.join(mo.output_path, data_folder_name)):
+                if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "electricity_hydro_store")):
+                    mo.mkdir(mo.path.join(mo.output_path, data_folder_name, "results", "electricity_hydro_store"))
+                if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_store")):
+                    mo.mkdir(mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_store"))
+                if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "heat_store")):
+                    mo.mkdir(mo.path.join(mo.output_path, data_folder_name, "results", "heat_store"))
+
+            # if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "electricity_one_day")):
+            #     mo.mkdir(mo.path.join(mo.output_path, data_folder_name, "results", "electricity_one_day"))
+            # if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_one_day")):
+            #     mo.mkdir(mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_one_day"))
+            # if not mo.path.isdir(mo.path.join(mo.output_path, data_folder_name, "results", "heat_one_day")):
+            #     mo.mkdir(mo.path.join(mo.output_path, data_folder_name, "results", "heat_one_day"))
 
             folder_list = mo.listdir(mo.path.join(mo.output_path, data_folder_name))
             folder_list.remove("results")
             for folder in folder_list:
                 result_files_folder_path = mo.path.join(mo.path.join(mo.output_path, data_folder_name), folder, "results")
+
+                file_hourly(result_files_folder_path, "electricity.csv", electricity_in, electricity_out, folder + "_electricity_bus", mo.path.join(mo.output_path, data_folder_name, "results", "electricity_hydro_store"), ele=True)
+                file_hourly(result_files_folder_path, "heat.csv", heat_in, heat_out, folder + "_heat_bus", mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_store"))
+                file_hourly(result_files_folder_path, "hydrogen.csv", hydrogen_in, hydrogen_out, folder + "_hydrogen_bus", mo.path.join(mo.output_path, data_folder_name, "results", "heat_store"))
 
                 # entire year
                 # file_hourly(result_files_folder_path, "electricity.csv", electricity_in, electricity_out, folder + "_electricity_bus", mo.path.join(mo.output_path, data_folder_name, "results", "electricity_one_day"), ele=True)
@@ -190,7 +203,7 @@ def vis(data_folder_name, line=False):
                 # one day
                 # file_hourly(result_files_folder_path, "electricity.csv", electricity_in, electricity_out, folder + "_electricity", mo.path.join(mo.output_path, data_folder_name, "results", "electricity_bus"), ele=True, time_step=True, time_slot=pd.date_range("2030-06-01", freq="H", periods=24, tz='Europe/Berlin'))
                 # file_hourly(result_files_folder_path, "heat.csv", heat_in, heat_out, folder + "_heat", mo.path.join(mo.output_path, data_folder_name, "results", "heat_bus"), time_step=True, time_slot=pd.date_range("2030-06-01", freq="H", periods=24, tz='Europe/Berlin'))
-                # file_hourly(result_files_folder_path, "hydrogen.csv", hydrogen_in, hydrogen_out, folder + "_hydrogen", mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_bus"), time_step=True, time_slot=pd.date_range("2030-06-01", freq="H", periods=24, tz='Europe/Berlin'))
+                file_hourly(result_files_folder_path, "hydrogen.csv", hydrogen_in, hydrogen_out, folder + "_hydrogen", mo.path.join(mo.output_path, data_folder_name, "results", "hydrogen_bus"), time_step=True, time_slot=pd.date_range("2030-06-01", freq="H", periods=24, tz='Europe/Berlin'))
         else:
             print("Error!!! output folder path dose not exits")
             return
@@ -199,7 +212,7 @@ def vis(data_folder_name, line=False):
 if __name__ == "__main__":
 
     # vis
-    vis("fi_3.0.1", bar=True)
+    vis("fi_3.0", line=True)
 
     # total bar energy graph with logs
-    vis_total_energy_bar(mo.input_data_folder_name)
+    # vis_total_energy_bar(mo.input_data_folder_name)
