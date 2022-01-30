@@ -25,7 +25,7 @@ def ver(*x):
 
 
 ##############
-input_data_folder_name = "fi_4.0"
+# input_data_folder_name = "fi_4.0"
 ##############
 
 input_path = "/run/media/d8/D8_HD/D/Sem_3/Cire/moosces/input_folder/"
@@ -41,7 +41,7 @@ def folder_exist_err(entire_path, folder_name, exist=True):
             raise IOError('D8 : "%s" does not exist' % folder_name)
 
 
-folder_exist_err(input_path, input_data_folder_name, exist=False)
+# folder_exist_err(input_path, input_data_folder_name, exist=False)
 
 # # make output folder
 # # not needed here

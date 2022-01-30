@@ -143,7 +143,7 @@ def vis(data_folder_name, cost=False, curl=False, energy=False, opt=False):
         curtail = pd.read_csv(mo.path.join(common_files_folder, "total_curtailments.csv"), index_col=0)
         plt.plot(curtail.columns, curtail.sum(axis=0) / 1e6)
         plt.xlabel("CO2 emission limit in MTons")
-        plt.ylabel("Energy in GWh/year")
+        plt.ylabel("Energy in TWh/year")
         plt.xticks(rotation="vertical")
         plt.title("Curtailed Electricity")
         mo.folder_exist_err(common_folder, 'curtailment.png', exist=True)

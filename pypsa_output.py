@@ -100,7 +100,9 @@ def energy(net, energy_list):
     return e
 
 
-def output(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=10e5, pypsa_output_data=True, ones=False):
+def output(data_folder_name: object, start_limit: object = 180, reduction: object = 20, end_limit: object = 0, m_factor: object = 10e5,
+           pypsa_output_data: object = True,
+           ones: object = False) -> object:
     """
     :param ones: run only one time
     :param data_folder_name: name of the folder where input files are stored
