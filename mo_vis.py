@@ -4,32 +4,38 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-bar_colour = ["b", "g", "k", "m", "c", "r", "pink", "orange", "yellow"]
-colour_list = ["black", "gray", "darkgrey", "silver","red", "green", "blue", "sienna", "orchid", "fuchsia", "salmon", "tomato", "peru", "khaki", "plum", "purple", "violet", "pink", "yellow"]
-
-# heat
-# heat_in = ["heat_pump", "heat_boiler_oil", "heat_boiler_gas", "heat_discharging"]
-# heat_out = ["heat_demand", "heat_charging"]
-
-# only ch and di
+# bar_colour = ["b", "g", "k", "m", "c", "r", "pink", "orange", "yellow"]
+#
+# # heat
+heat_in = ["heat_pump", "heat_boiler_oil", "heat_boiler_gas", "heat_discharging"]
+heat_out = ["heat_demand", "heat_charging"]
+#
+#
+# # only ch and di
 # heat_in = ["heat_discharging"]
 # heat_out = ["heat_charging"]
+#
+# heat_colour = ["b-", "g--", "k:", "m+", "c--", "r:"]
+#
+# # hydrogen
+hydrogen_in = ["electrolyser", "steam_reforming", "hydrogen_discharging"]
+hydrogen_out = ["hydrogen_demand", "hydrogen_charging", "hydrogen_fuel_cell"]
 
-heat_colour = ["b-", "g--", "k:", "m+", "c--", "r:"]
-
-# hydrogen
-# hydrogen_in = ["electrolyser", "steam_reforming", "ydrogen_discharging"]
-# hydrogen_out = ["hydrogen_demand", "ydrogen_charging", "hydrogen_fuel_cell"]
 
 # only ch and di
 # hydrogen_in = ["hydrogen_discharging"]
 # hydrogen_out = ["hydrogen_charging"]
 
-hydrogen_colour = ["b-", "g--", "k:", "m-", "c--", "r:"]
+# hydrogen_colour = ["b-", "g--", "k:", "m-", "c--", "r:"]
+#
+# # electricity
+electricity_out = ['heat_pump', 'electrolyser', "", "electricity_demand", "battery_charging", "hydro_charging"]
+electricity_in = ['biomass', 'hydropower', 'solar', 'wind_offshore', 'wind_onshore', 'lignite_coal', 'hard_coal', 'natural_gas', "oil", "battery_discharging", "hydro_discharging", "hydrogen_fuel_cell"]
 
-# electricity
-# electricity_out = ['heat_pump', 'electrolyser', "", "electricity_demand", "battery_harging", "hydro_harging"]
-# electricity_in = ['biomass', 'hydropower', 'solar', 'wind_offshore', 'wind_onshore', 'lignite_coal', 'hard_coal', 'natural_gas', "oil", "battery_ischarging", "hydro_ischarging", "hydrogen_fuel_cell"]
+colour_list = ["black", "gray", "darkgrey", "silver","red", "green", "blue", "sienna", "orchid", "fuchsia", "salmon", "tomato", "peru", "khaki", "plum", "purple", "violet", "pink", "yellow"]
+
+
+
 
 # only ch and di
 # electricity_in = ["hydro_discharging"]
@@ -40,26 +46,6 @@ hydrogen_colour = ["b-", "g--", "k:", "m-", "c--", "r:"]
 
 
 opt_file = ['solar', 'wind_offshore', 'wind_onshore', 'steam_reforming', 'support_gen_ele', 'electrolyser', 'heat_pump', 'battery_storage', 'hydro_storage', 'hydrogen_storage', 'heat_storage', 'battery_charging', 'battery_discharging', 'hydro_charging', 'hydro_discharging', 'hydrogen_charging', 'hydrogen_discharging', 'heat_charging', 'heat_discharging']
-
-
-def vis_total_energy_bar(data_folder_name):
-    common_result_files_folder_path = mo.path.join(mo.output_path, data_folder_name, "results")
-    if not mo.path.isdir(common_result_files_folder_path):
-        print("not found result folder")
-        print("exit!!")
-        return
-    if not mo.path.isdir(mo.path.join(common_result_files_folder_path, "bar_graph_total")):
-        mo.mkdir(mo.path.join(common_result_files_folder_path, "bar_graph_total"))
-        print("creating bar_graph_total folder")
-    file_total(common_result_files_folder_path, "heat_total.csv", heat_in, heat_out, "heat_total",
-               mo.path.join(common_result_files_folder_path, "bar_graph_total"))
-    print("created heat_total bar graph")
-    file_total(common_result_files_folder_path, "hydrogen_total.csv", hydrogen_in, hydrogen_out, "hydrogen_total",
-               mo.path.join(common_result_files_folder_path, "bar_graph_total"))
-    print("created hydrogen_total bar graph")
-    file_total(common_result_files_folder_path, "electricity_total.csv", electricity_in, electricity_out,
-               "electricity_total", mo.path.join(common_result_files_folder_path, "bar_graph_total"))
-    print("created electricity_total bar graph")
 
 
 def cum_sum_file(df, e_list):
@@ -153,7 +139,7 @@ def file_total(in_folder_path, energy_file_name, e_list_in, e_list_out, out_file
     plt.title(out_file_name)
     plt.xlabel("CO2 limit in Mtons")
     plt.ylabel("annual energy in MWh")
-    plt.xticks(np.arange(len(df_in.index)), df_in.index)
+    plt.xticks(np.arange(len(df_in.index)), df_in.index, rotation="vertical")
     plt.legend(fontsize="xx-small")
     plt.savefig(mo.path.join(out_folder_path, out_file_name + ".png"), dpi=600)
     plt.clf()
@@ -210,9 +196,4 @@ def vis(data_folder_name, line=False):
 
 
 if __name__ == "__main__":
-
-    # vis
-    vis("fi_3.0", line=True)
-
-    # total bar energy graph with logs
-    # vis_total_energy_bar(mo.input_data_folder_name)
+    # vis("fi_3.0", line=True)
