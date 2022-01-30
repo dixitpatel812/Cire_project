@@ -25,15 +25,24 @@ def ver(*x):
 
 
 ##############
-input_data_folder_name = "test"
+input_data_folder_name = "fi_4.0"
 ##############
 
 input_path = "/run/media/d8/D8_HD/D/Sem_3/Cire/moosces/input_folder/"
 output_path = "/run/media/d8/D8_HD/D/Sem_3/Cire/moosces/output_folder/"
 
-# check input folder (D8)
-if not path.exists(path.join(input_path,input_data_folder_name)):
-    raise IOError('D8 : "%s" does not exist' % input_data_folder_name)
+
+def folder_exist(entire_path, folder_name, exist=True):
+    if exist:
+        if not path.exists(path.join(entire_path, folder_name)):
+            raise IOError('D8 : "%s" does not exist' % folder_name)
+    else:
+        if path.exists(path.join(entire_path, folder_name)):
+            raise IOError('D8 : "%s" exist' % folder_name)
+
+
+folder_exist(input_path, input_data_folder_name, exist=True)
+# folder_exist(output_path, input_data_folder_name, exist=False)
 
 # # make output folder
 # # not needed here

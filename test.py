@@ -15,7 +15,7 @@ def vis_ind(data_frame, title, folder_path):
         plt.clf()
 
 
-def vis_new(data_folder_name, cost=False, cur=False, opt=False, energy=False):
+def vis_new(data_folder_name, cost=False, curl=False, opt=False, energy=False):
     r_folder = mo.path.join(mo.output_path, data_folder_name, "results")
 
     if energy:
@@ -116,7 +116,7 @@ def curtailment(data_folder_name):
 
 if __name__ == "__main__":
     curtailment("fi_3.0.1")
-    vis_new("fi_3.0.1", cur=True)
+    vis_new("fi_3.0.1", curl=True)
 
 
 
