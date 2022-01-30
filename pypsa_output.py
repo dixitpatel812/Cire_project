@@ -3,6 +3,11 @@ import mopy as mo
 from pypsa import Network
 import pandas as pd
 
+# output_folder_path = mo.path.join(mo.output_path, data_folder_name)
+# common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
+# common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
+# individual_folder = mo.path.join(mo.output_path, data_folder_name, "individual")
+# pypsa_out_path = mo.path.join(mo.output_path, data_folder_name, "pypsa_out")
 
 network_name = "moosces"
 
