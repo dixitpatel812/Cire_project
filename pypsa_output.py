@@ -1,6 +1,51 @@
+import logging
+
 import mopy as mo
 from pypsa import Network
 import pandas as pd
+
+
+network_name = "moosces"
+
+
+def folder_creation(data_folder_name, start_limit=180, reduction=20, end_limit=0):
+    output_folder_path = mo.path.join(mo.output_path, data_folder_name)
+
+    common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
+    individual_folder = mo.path.join(mo.output_path, data_folder_name, "individual")
+
+    pypsa_out_path = mo.path.join(mo.output_path, data_folder_name, "pypsa_out")
+
+    # make output folder
+    mo.folder_exist_err(mo.output_path, data_folder_name, exist=True)
+    mo.mkdir(output_folder_path)
+
+    # individual folder
+    if not mo.path.isdir(common_folder):
+        mo.mkdir(common_folder)
+
+    # common folder
+    if not mo.path.isdir(individual_folder):
+        mo.mkdir(individual_folder)
+
+    # initial co2 limit
+    co2_limit = start_limit
+
+    # pypsa out folder
+    if not mo.path.isdir(pypsa_out_path):
+        mo.mkdir(pypsa_out_path)
+
+    while co2_limit >= end_limit:
+        # pypsa result folder
+        pypsa_co2limit_folder_path = mo.path.join(pypsa_out_path, str(co2_limit))
+        mo.mkdir(pypsa_co2limit_folder_path)
+
+        # d8 files folder ()
+        d8_co2limit_folder_path = mo.path.join(individual_folder, str(co2_limit))
+        mo.mkdir(d8_co2limit_folder_path)
+
+        # loop condition variable
+        co2_limit = co2_limit - reduction
 
 
 def opt(net, col_name):
@@ -91,7 +136,7 @@ def energy(net, energy_list):
     return e
 
 
-def output(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=10e5, output_data=True, ones=False):
+def output(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_factor=10e5, pypsa_output_data=True, ones=False):
     """
     :param ones: run only one time
     :param data_folder_name: name of the folder where input files are stored
@@ -99,12 +144,37 @@ def output(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_facto
     :param reduction: Co2 emission reduction
     :param end_limit: stop limit of reduction
     :param m_factor: multiplication factor is 1000000
-    :param output_data: (bool) if true, gives output. otherwise, no output.
+    :param pypsa_output_data: (bool) if true, gives output. otherwise, no output.
     :return: no return
     note: producing output of  both (start and end) limits
     """
-    # start_limit as co2 limit at a point
-    co2_limit = start_limit
+    # input folder
+    input_folder_path = mo.path.join(mo.input_path, data_folder_name)
+
+    # # # folder creation / path creation
+    # output folder
+    output_folder_path = mo.path.join(mo.output_path, data_folder_name)
+    mo.folder_exist_err(mo.output_path, data_folder_name, exist=True)
+    logging.info(" D8 : creating %s folder in output_folder" % data_folder_name)
+    if not mo.path.isdir(output_folder_path):
+        mo.mkdir(output_folder_path)
+    # common folder
+    common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
+    if not mo.path.isdir(common_folder):
+        mo.mkdir(common_folder)
+    # common files folder
+    common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
+    if not mo.path.isdir(common_files_folder):
+        mo.mkdir(common_files_folder)
+    # individual folder
+    individual_folder = mo.path.join(mo.output_path, data_folder_name, "individual")
+    if not mo.path.isdir(individual_folder):
+        mo.mkdir(individual_folder)
+    # pypsa output folder
+    if pypsa_output_data:
+        pypsa_out_path = mo.path.join(mo.output_path, data_folder_name, "pypsa_out")
+        if not mo.path.isdir(pypsa_out_path):
+            mo.mkdir(pypsa_out_path)
 
     # creating data frames
     cost = pd.DataFrame()
@@ -113,68 +183,61 @@ def output(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_facto
     heat_total = pd.DataFrame()
     hydrogen_total = pd.DataFrame()
 
-    # input folder
-    input_folder_path = mo.path.join(mo.input_path, data_folder_name)
-    if not mo.path.isdir(input_folder_path):
-        print("Error!!!! input_data_folder dose not exist")
-        return
-
     # demand file
     demand_file_path = mo.path.join(input_folder_path, "loads-p_set.csv")
     demand_df = pd.read_csv(demand_file_path, index_col="name", parse_dates=True)
 
-    # output folder
-    output_folder_path = mo.path.join(mo.output_path, data_folder_name)
-    if not mo.path.isdir(output_folder_path):
-        mo.mkdir(output_folder_path)
-
-    # create PyPSA network
+    # # # create PyPSA network
     network = Network()
     network.import_from_csv_folder(input_folder_path)
+    logging.info(" D8 : created %s network " % network_name)
+
+    co2_limit = start_limit
 
     while co2_limit >= end_limit:
+        logging.info(f" D8 : simulation of {network_name} at {co2_limit}")
 
         # add global constraint
         network.add("GlobalConstraint", "CO2_emission_limit", type="primary_energy", carrier_attribute="co2_emissions",
                     constant=co2_limit * int(m_factor), sense="<=")
         network.lopf(network.snapshots, solver_name="gurobi_direct")
 
-        # result folder
-        result_folder_path = mo.path.join(output_folder_path, str(co2_limit))
-        if not mo.path.isdir(result_folder_path):
-            mo.mkdir(result_folder_path)
+        # store output data?
+        if pypsa_output_data:
+            # pypsa result folder
+            pypsa_co2limit_folder_path = mo.path.join(pypsa_out_path, str(co2_limit))
+            mo.mkdir(pypsa_co2limit_folder_path)
+            # store data
+            network.export_to_csv_folder(pypsa_co2limit_folder_path)
+        else:
+            logging.warning(" D8 : not stored pypsa output")
 
-        # result files folder
-        result_files_folder_path = mo.path.join(result_folder_path, "results")
-        if not mo.path.isdir(result_files_folder_path):
-            mo.mkdir(result_files_folder_path)
+        # d8 files folder ()
+        d8_co2limit_folder_path = mo.path.join(individual_folder, str(co2_limit))
+        if not mo.path.isdir(d8_co2limit_folder_path):
+            mo.mkdir(d8_co2limit_folder_path)
 
         # heat file
         heat = mo.hor(energy(network, mo.heat_list), -demand_df.loc[:, "heat_demand"])
+        heat.to_csv(mo.path.join(d8_co2limit_folder_path, "heat.csv"))
+
         heat_total = mo.hor(heat_total, file(heat, col_name=co2_limit, col_sum=True))
-        heat.to_csv(mo.path.join(result_files_folder_path, "heat.csv"))
 
         # hydrogen file
         hydrogen = energy(network, mo.hydrogen_list)
         hydrogen["hydrogen_demand"] = -network.loads.loc["hydrogen_demand", "p_set"]
+        hydrogen.to_csv(mo.path.join(d8_co2limit_folder_path, "hydrogen.csv"))
+
         hydrogen_total = mo.hor(hydrogen_total, file(hydrogen, col_name=co2_limit, col_sum=True))
-        hydrogen.to_csv(mo.path.join(result_files_folder_path, "hydrogen.csv"))
 
         # electricity file
         electricity = mo.hor(energy(network, mo.electricity_list), -demand_df.loc[:, "electricity_demand"])
+        electricity.to_csv(mo.path.join(d8_co2limit_folder_path, "electricity.csv"))
+
         electricity_total = mo.hor(electricity_total, file(electricity, col_name=co2_limit, col_sum=True))
-        electricity.to_csv(mo.path.join(result_files_folder_path, "electricity.csv"))
 
         # opt file
         opt_file = mo.hor(opt_file, opt(network, co2_limit))
-
-        # store output data?
-        if output_data:
-            pass
-            # network.export_to_csv_folder(result_folder_path)
-        else:
-            # if false then directly store the data that are important. (Ex: store, link and generators)
-            pass
 
         # costs
         c = costs(network.generators, network.generators_t.p, str(co2_limit), mc=True)
@@ -183,25 +246,21 @@ def output(data_folder_name, start_limit=180, reduction=20, end_limit=0, m_facto
         cost = mo.hor(cost, c)
 
         # remove global constraint
-        network.remove("GlobalConstraint", ["CO2_emission_limit"])
+        network.remove("GlobalConstraint", "CO2_emission_limit")
 
         # loop condition variable
         co2_limit = co2_limit - reduction
         if ones:
             break
 
-    # result files folder
-    common_result_files_folder_path = mo.path.join(output_folder_path, "results")
-    if not mo.path.isdir(common_result_files_folder_path):
-        mo.mkdir(common_result_files_folder_path)
-
     # saving opt file
-    opt_file.to_csv(mo.path.join(common_result_files_folder_path, "opt.csv"))
-    hydrogen_total.to_csv(mo.path.join(common_result_files_folder_path, "hydrogen_total.csv"))
-    heat_total.to_csv(mo.path.join(common_result_files_folder_path, "heat_total.csv"))
-    electricity_total.to_csv(mo.path.join(common_result_files_folder_path, "electricity_total.csv"))
-    cost.to_csv(mo.path.join(common_result_files_folder_path, "cost.csv"))
+    opt_file.to_csv(mo.path.join(common_files_folder, "opt.csv"))
+    hydrogen_total.to_csv(mo.path.join(common_files_folder, "hydrogen_total.csv"))
+    heat_total.to_csv(mo.path.join(common_files_folder, "heat_total.csv"))
+    electricity_total.to_csv(mo.path.join(common_files_folder, "electricity_total.csv"))
+    cost.to_csv(mo.path.join(common_files_folder, "cost.csv"))
 
 
 if __name__ == "__main__":
-    output("fi_4.0")
+    # folder_creation("test")
+    output("fi_4.0", ones=False)

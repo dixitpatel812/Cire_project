@@ -32,17 +32,16 @@ input_path = "/run/media/d8/D8_HD/D/Sem_3/Cire/moosces/input_folder/"
 output_path = "/run/media/d8/D8_HD/D/Sem_3/Cire/moosces/output_folder/"
 
 
-def folder_exist(entire_path, folder_name, exist=True):
+def folder_exist_err(entire_path, folder_name, exist=True):
     if exist:
-        if not path.exists(path.join(entire_path, folder_name)):
-            raise IOError('D8 : "%s" does not exist' % folder_name)
-    else:
         if path.exists(path.join(entire_path, folder_name)):
             raise IOError('D8 : "%s" exist' % folder_name)
+    else:
+        if not path.exists(path.join(entire_path, folder_name)):
+            raise IOError('D8 : "%s" does not exist' % folder_name)
 
 
-folder_exist(input_path, input_data_folder_name, exist=True)
-# folder_exist(output_path, input_data_folder_name, exist=False)
+folder_exist_err(input_path, input_data_folder_name, exist=False)
 
 # # make output folder
 # # not needed here
