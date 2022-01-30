@@ -1,51 +1,10 @@
 import logging
-
 import mopy as mo
 from pypsa import Network
 import pandas as pd
 
 
 network_name = "moosces"
-
-
-def folder_creation(data_folder_name, start_limit=180, reduction=20, end_limit=0):
-    output_folder_path = mo.path.join(mo.output_path, data_folder_name)
-
-    common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
-    individual_folder = mo.path.join(mo.output_path, data_folder_name, "individual")
-
-    pypsa_out_path = mo.path.join(mo.output_path, data_folder_name, "pypsa_out")
-
-    # make output folder
-    mo.folder_exist_err(mo.output_path, data_folder_name, exist=True)
-    mo.mkdir(output_folder_path)
-
-    # individual folder
-    if not mo.path.isdir(common_folder):
-        mo.mkdir(common_folder)
-
-    # common folder
-    if not mo.path.isdir(individual_folder):
-        mo.mkdir(individual_folder)
-
-    # initial co2 limit
-    co2_limit = start_limit
-
-    # pypsa out folder
-    if not mo.path.isdir(pypsa_out_path):
-        mo.mkdir(pypsa_out_path)
-
-    while co2_limit >= end_limit:
-        # pypsa result folder
-        pypsa_co2limit_folder_path = mo.path.join(pypsa_out_path, str(co2_limit))
-        mo.mkdir(pypsa_co2limit_folder_path)
-
-        # d8 files folder ()
-        d8_co2limit_folder_path = mo.path.join(individual_folder, str(co2_limit))
-        mo.mkdir(d8_co2limit_folder_path)
-
-        # loop condition variable
-        co2_limit = co2_limit - reduction
 
 
 def opt(net, col_name):
