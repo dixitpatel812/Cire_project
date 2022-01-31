@@ -20,5 +20,10 @@ difference = 5
 
 # # vis
 # vis.stacked_energy_column_graph(input_data_folder_name)
-vis.vis(input_data_folder_name, curl=True, cost=True)
+# vis.vis(input_data_folder_name, curl=True, cost=True)
 # vis.vis_comparison_ind(input_data_folder_name, vis.comparison_list)
+# # line graph
+# vis.energy_line_graph(input_data_folder_name, "electricity_total.csv")
+# vis.energy_line_graph(input_data_folder_name, "heat_total.csv")
+# vis.energy_line_graph(input_data_folder_name, "hydrogen_total.csv")
+# vis.curtailment_bar_graph(input_data_folder_name)
