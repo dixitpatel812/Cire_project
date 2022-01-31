@@ -98,15 +98,10 @@ heat_out = ["heat_demand", "losses"]
 
 
 def stacked_energy_column_graph(data_folder_name):
-    common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
     common_bar = mo.path.join(mo.output_path, data_folder_name, "common", "stacked_energy_column_graph")
-    if not mo.path.isdir(common_files_folder):
-        print("not found result folder")
-        print("exit!!")
-        return
+    mo.folder_exist_err(mo.path.join(mo.output_path, data_folder_name, "common"), "stacked_energy_column_graph", exist=True)
     if not mo.path.isdir(common_bar):
         mo.mkdir(common_bar)
-        print("creating common_bar folder")
     file_total(data_folder_name, "heat_total.csv", heat_in, heat_out, "heat_total", common_bar)
     print("created heat_total bar graph")
     file_total(data_folder_name, "hydrogen_total.csv", hydrogen_in, hydrogen_out, "hydrogen_total", common_bar)
@@ -243,11 +238,39 @@ def vis(data_folder_name, cost=False, curl=False, energy=False, opt=False):
         vis_ind(opt_file, "opt", mo.path.join(common_folder, "opt_ind"))
 
 
+def curtailment_bar_graph(data_folder_name):
+    common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
+    common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
+
+    curtail = pd.read_csv(mo.path.join(common_files_folder, "total_curtailments.csv"), index_col=0)/1e6
+
+    x = np.arange(len(curtail.columns))
+
+    c = 0
+    plt.bar(x - 0.22, curtail.loc["solar", :], color=colour_list[c], width=.20, label="solar")
+
+    c = c+1
+    plt.bar(x, curtail.loc["wind_offshore", :], color=colour_list[c], width=.20, label="wind_offshore")
+
+    c = c+1
+    plt.bar(x + 0.22, curtail.loc["wind_onshore", :], color=colour_list[c], width=.20, label="wind_onshore")
+
+    plt.title("curtailed energy")
+    plt.xlabel("CO2 emission in MTons")
+    plt.ylabel("Energy in TWh")
+    plt.xticks(np.arange(len(curtail.columns)), curtail.columns, rotation="vertical")
+    plt.legend(fontsize="x-small")
+    # plt.show()
+    plt.savefig(mo.path.join(common_folder, "curtailment_bar" + ".png"), dpi=600)
+    plt.clf()
+
+
 if __name__ == "__main__":
-    stacked_energy_column_graph("fi_4.0")
+    # stacked_energy_column_graph("fi_4.0.1")
     # vis("fi_4.0", curl=True, cost=True)
     # vis_comparison_ind("fi_4.0.1", comparison_list)
     # energy_line_graph("fi_4.0.1", "electricity_total.csv")
     # energy_line_graph("fi_4.0.1", "heat_total.csv")
     # energy_line_graph("fi_4.0.1", "hydrogen_total.csv")
+    # curtailment_bar_graph("fi_4.0")
     # pass
