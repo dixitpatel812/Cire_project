@@ -50,8 +50,8 @@ def vis_ind(data_frame, title, folder_path, ind=True):
         plt.clf()
 
 
-def file_total(in_folder_path, energy_file_name, e_list_in, e_list_out, out_file_name, out_folder_path, ele=False):
-    df = pd.read_csv(mo.path.join(in_folder_path, energy_file_name), index_col=0)
+def file_total(data_folder_name, csv_file_name, e_list_in, e_list_out, out_file_name, out_folder_path, ele=False):
+    df = updated_energy(data_folder_name, csv_file_name, drooping=True, demand=False, loss=True)
 
     c = 0
 
@@ -87,14 +87,14 @@ def file_total(in_folder_path, energy_file_name, e_list_in, e_list_out, out_file
 
 # for stacked_energy_column_graph
 
-electricity_out = ['heat_pump', 'electrolyser', "", "electricity_demand"]
 electricity_in = ['biomass', 'hydropower', 'solar', 'wind_offshore', 'wind_onshore', 'lignite_coal', 'hard_coal', 'natural_gas', "oil", "hydrogen_fuel_cell"]
+electricity_out = ['heat_pump', 'electrolyser', "electricity_demand", "losses"]
 
 hydrogen_in = ["electrolyser", "steam_reforming"]
-hydrogen_out = ["hydrogen_demand", "hydrogen_fuel_cell"]
+hydrogen_out = ["hydrogen_demand", "losses", "hydrogen_fuel_cell"]
 
 heat_in = ["heat_pump", "heat_boiler_oil", "heat_boiler_gas"]
-heat_out = ["heat_demand"]
+heat_out = ["heat_demand", "losses"]
 
 
 def stacked_energy_column_graph(data_folder_name):
@@ -107,14 +107,11 @@ def stacked_energy_column_graph(data_folder_name):
     if not mo.path.isdir(common_bar):
         mo.mkdir(common_bar)
         print("creating common_bar folder")
-    file_total(common_files_folder, "heat_total.csv", heat_in, heat_out, "heat_total",
-               common_bar)
+    file_total(data_folder_name, "heat_total.csv", heat_in, heat_out, "heat_total", common_bar)
     print("created heat_total bar graph")
-    file_total(common_files_folder, "hydrogen_total.csv", hydrogen_in, hydrogen_out, "hydrogen_total",
-               common_bar)
+    file_total(data_folder_name, "hydrogen_total.csv", hydrogen_in, hydrogen_out, "hydrogen_total", common_bar)
     print("created hydrogen_total bar graph")
-    file_total(common_files_folder, "electricity_total.csv", electricity_in, electricity_out,
-               "electricity_total", common_bar)
+    file_total(data_folder_name, "electricity_total.csv", electricity_in, electricity_out, "electricity_total", common_bar)
     print("created electricity_total bar graph")
 
 
@@ -247,10 +244,10 @@ def vis(data_folder_name, cost=False, curl=False, energy=False, opt=False):
 
 
 if __name__ == "__main__":
-    # stacked_energy_column_graph("fi_4.0")
+    stacked_energy_column_graph("fi_4.0")
     # vis("fi_4.0", curl=True, cost=True)
     # vis_comparison_ind("fi_4.0.1", comparison_list)
-    energy_line_graph("fi_4.0", "electricity_total.csv")
-    energy_line_graph("fi_4.0", "heat_total.csv")
-    energy_line_graph("fi_4.0", "hydrogen_total.csv")
+    # energy_line_graph("fi_4.0.1", "electricity_total.csv")
+    # energy_line_graph("fi_4.0.1", "heat_total.csv")
+    # energy_line_graph("fi_4.0.1", "hydrogen_total.csv")
     # pass
