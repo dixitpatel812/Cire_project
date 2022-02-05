@@ -6,6 +6,8 @@ import logging
 
 colour_list = ["black", "gray", "darkgrey", "silver", "red", "green", "blue", "sienna", "orchid", "fuchsia", "salmon", "tomato", "peru", "khaki", "plum", "purple", "violet", "pink", "yellow"]
 
+comparison_list = ["electrolyser", "solar", "biomass", "natural_gas", "lignite_coal", "hard_coal", 'hydropower']
+
 
 def cum_sum_file_total(df, e_list):
     df_new = pd.DataFrame(index=df.columns)
@@ -156,9 +158,6 @@ def energy_line_graph(data_folder_name, csv_file_name):
     vis_ind(energy, csv_file_name[:-4], line_graph_folder, ind=False)
 
 
-comparison_list = ['hydropower']
-
-
 def vis_comparison_ind(data_folder_name, c_list):
     common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
     common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
@@ -246,7 +245,7 @@ def curtailment_bar_graph(data_folder_name):
 
     x = np.arange(len(curtail.columns))
 
-    c = 0
+    c = 5
     plt.bar(x - 0.22, curtail.loc["solar", :], color=colour_list[c], width=.20, label="solar")
 
     c = c+1
@@ -268,9 +267,9 @@ def curtailment_bar_graph(data_folder_name):
 if __name__ == "__main__":
     # stacked_energy_column_graph("fi_4.0.1")
     # vis("fi_4.0", curl=True, cost=True)
-    # vis_comparison_ind("fi_4.0.1", comparison_list)
+    vis_comparison_ind("fi_4.0.1", comparison_list)
     # energy_line_graph("fi_4.0.1", "electricity_total.csv")
     # energy_line_graph("fi_4.0.1", "heat_total.csv")
     # energy_line_graph("fi_4.0.1", "hydrogen_total.csv")
-    # curtailment_bar_graph("fi_4.0")
+    # curtailment_bar_graph("fi_4.0.1")
     # pass
