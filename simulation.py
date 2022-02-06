@@ -4,11 +4,11 @@ import d8_output
 import vis
 
 # # mopy
-input_data_folder_name = "test"
+input_data_folder_name = "Result_0.0"
 s_limit = 180
-difference = 180
-#
-comparison_list = ["electrolyser", "solar", "biomass", "natural_gas", "lignite_coal", "hard_coal", 'hydropower']
+difference = 15
+# #
+comparison_list = ["electrolyser", "solar", "biomass", "natural_gas", "lignite_coal", "hard_coal", 'hydropower', "wind_onshore", "wind_offshore", "natural_gas", "steam_reforming", "heat_boiler_oil", 'heat_boiler_gas', 'heat_pump']
 #
 mopy.folder_exist_err(mopy.input_path, input_data_folder_name, exist=False)
 #
@@ -19,11 +19,13 @@ pypsa_output.output(input_data_folder_name, start_limit=s_limit, reduction=diffe
 # # d8_output
 d8_output.curtailment(input_data_folder_name, start_limit=s_limit, reduction=difference, end_limit=0)
 #
+
+
 # # vis
-vis.stacked_energy_column_graph(input_data_folder_name)
-vis.vis(input_data_folder_name, curl=True, cost=True)
+vis.vis(input_data_folder_name, curl=True)
+vis.vis(input_data_folder_name, cost=True)
+vis.vis(input_data_folder_name, stacked_energy_column_graph=True)
 vis.vis_comparison_ind(input_data_folder_name,  c_list=comparison_list)
-# # line graph
-vis.energy_line_graph(input_data_folder_name, "electricity_total.csv")
-vis.energy_line_graph(input_data_folder_name, "heat_total.csv")
-vis.energy_line_graph(input_data_folder_name, "hydrogen_total.csv")
+# # # line graph
+vis.vis(input_data_folder_name, opt_lines=True)
+vis.vis(input_data_folder_name, energy_lines=True)
