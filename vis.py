@@ -27,7 +27,7 @@ def vis_ind(data_frame, title, folder_path, ind=True):
     :param ind: True (individual graph will be saved) , False (all in one graph will be saved)
     :return:
     """
-    c = 0
+    c = 3
     if ind:
         for i in data_frame.index:
             plt.plot(data_frame.columns, data_frame.loc[i, :], colour_list[c], label=i)
@@ -100,15 +100,15 @@ heat_out = ["heat_demand", "losses"]
 
 
 def stacked_total_energy_column_graph(data_folder_name):
-    common_bar = mo.path.join(mo.output_path, data_folder_name, "vis", "stacked_total_energy_column_graph")
+    vis_folder = mo.path.join(mo.output_path, data_folder_name, "vis", "stacked_total_energy_column_graph")
     mo.folder_exist_err(mo.path.join(mo.output_path, data_folder_name, "vis"), "stacked_total_energy_column_graph", exist=True)
-    if not mo.path.isdir(common_bar):
-        mo.mkdir(common_bar)
-    file_total(data_folder_name, "heat_total.csv", heat_in, heat_out, "heat_total", common_bar)
+    if not mo.path.isdir(vis_folder):
+        mo.mkdir(vis_folder)
+    file_total(data_folder_name, "heat_total.csv", heat_in, heat_out, "heat_total", vis_folder)
     print("created heat_total bar graph")
-    file_total(data_folder_name, "hydrogen_total.csv", hydrogen_in, hydrogen_out, "hydrogen_total", common_bar)
+    file_total(data_folder_name, "hydrogen_total.csv", hydrogen_in, hydrogen_out, "hydrogen_total", vis_folder)
     print("created hydrogen_total bar graph")
-    file_total(data_folder_name, "electricity_total.csv", electricity_in, electricity_out, "electricity_total", common_bar)
+    file_total(data_folder_name, "electricity_total.csv", electricity_in, electricity_out, "electricity_total", vis_folder)
     print("created electricity_total bar graph")
 
 
@@ -128,12 +128,12 @@ def updated_energy(data_folder_name, csv_file_name, drooping=False, loss=False, 
     cd = pd.DataFrame(index=energy.columns)
     # remove charging, discharging and store
     for i in energy.index:
-        if demand:
-            if "demand" in i:
-                energy = energy.drop([i], axis=0)
         if "storage" in i:
             energy = energy.drop(i, axis=0)
         if drooping:
+            if demand:
+                if "demand" in i:
+                    energy = energy.drop([i], axis=0)
             if "discharging" in i:
                 cd = mo.hor(cd, energy.loc[i, :])
                 energy = energy.drop(i, axis=0)
@@ -149,21 +149,21 @@ def updated_energy(data_folder_name, csv_file_name, drooping=False, loss=False, 
 
 
 def energy_line_graph(data_folder_name, csv_file_name):
-    common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
-    line_graph_folder = mo.path.join(common_folder, "total_energy_line_graph")
-    # mo.folder_exist_err(common_folder, "total_energy_line_graph")
+    vis_folder = mo.path.join(mo.output_path, data_folder_name, "vis")
+    line_graph_folder = mo.path.join(vis_folder, "total_energy_line_graph")
+    # mo.folder_exist_err(vis_folder, "total_energy_line_graph")
     if not mo.path.exists(line_graph_folder):
         mo.mkdir(line_graph_folder)
-    energy = updated_energy(data_folder_name, csv_file_name, drooping=True, demand=True, loss=True)
+    energy = updated_energy(data_folder_name, csv_file_name, drooping=True, demand=False, loss=True)
     vis_ind(energy, csv_file_name[:-4], line_graph_folder, ind=False)
 
 
 def vis_comparison_ind(data_folder_name, c_list):
     common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
-    common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
-    comparison_folder = mo.path.join(common_folder, "comparison")
+    vis_folder = mo.path.join(mo.output_path, data_folder_name, "vis")
+    comparison_folder = mo.path.join(vis_folder, "comparison")
 
-    mo.folder_exist_err(common_folder, "comparison", exist=True)
+    mo.folder_exist_err(vis_folder, "comparison", exist=True)
     mo.mkdir(mo.path.join(comparison_folder))
 
     electricity = pd.read_csv(mo.path.join(common_files_folder, "electricity_total.csv"), index_col=0)
@@ -187,12 +187,12 @@ electricity_opt = ['biomass', 'hydropower',  'wind_offshore', '', 'lignite_coal'
 electricity_opt_other = ['solar', "wind_onshore", "heat_pump" ]
 hydrogen_opt = ["electrolyser", "steam_reforming"]
 heat_opt = ["heat_pump", "heat_boiler_oil", "heat_boiler_gas"]
-storage_opt = ["hydrogen_storag", "heat_storage", "battery_storage", "hydro_storage" ]
+storage_opt = ["hydrogen_storage", "heat_storage", "battery_storage", "hydro_storage" ]
 
 
 def opt_line_graph(data_folder_name, opt_list, title):
     common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
-    opt_line_graph_folder = mo.path.join(mo.output_path, data_folder_name, "common", "opt_line_graph")
+    opt_line_graph_folder = mo.path.join(mo.output_path, data_folder_name, "vis", "opt_line_graph")
     if not mo.path.exists(opt_line_graph_folder):
         mo.mkdir(opt_line_graph_folder)
     opt_file = pd.read_csv(mo.path.join(common_files_folder, "opt.csv"), index_col=0)
@@ -212,7 +212,6 @@ def opt_line_graph(data_folder_name, opt_list, title):
 
 def vis(data_folder_name, cost=False, curl=False, energy=False, opt=False, stacked_energy_column_graph=False, opt_lines=False, energy_lines=False):
     common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
-    common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
     vis_folder = mo.path.join(mo.output_path, data_folder_name, "vis")
     if not mo.path.exists(vis_folder):
         mo.mkdir(vis_folder)
@@ -244,7 +243,7 @@ def vis(data_folder_name, cost=False, curl=False, energy=False, opt=False, stack
         heat = pd.read_csv(mo.path.join(common_files_folder, "heat_total.csv"), index_col=0)
         hydrogen = pd.read_csv(mo.path.join(common_files_folder, "hydrogen_total.csv"), index_col=0)
 
-        total_energy_folder_ind = mo.path.join(common_folder, "total_energy_ind")
+        total_energy_folder_ind = mo.path.join(vis_folder, "total_energy_ind")
         if not mo.path.isdir(total_energy_folder_ind):
             mo.mkdir(total_energy_folder_ind)
 
@@ -262,9 +261,9 @@ def vis(data_folder_name, cost=False, curl=False, energy=False, opt=False, stack
 
     if opt:
         opt_file = pd.read_csv(mo.path.join(common_files_folder, "opt.csv"), index_col=0)
-        if not mo.path.isdir(mo.path.join(common_folder, "opt_ind")):
-            mo.mkdir(mo.path.join(common_folder, "opt_ind"))
-        vis_ind(opt_file, "opt", mo.path.join(common_folder, "opt_ind"))
+        if not mo.path.isdir(mo.path.join(vis_folder, "opt_ind")):
+            mo.mkdir(mo.path.join(vis_folder, "opt_ind"))
+        vis_ind(opt_file, "opt", mo.path.join(vis_folder, "opt_ind"))
 
     if stacked_energy_column_graph:
         stacked_total_energy_column_graph(data_folder_name)
@@ -282,6 +281,7 @@ def vis(data_folder_name, cost=False, curl=False, energy=False, opt=False, stack
         energy_line_graph(data_folder_name, "hydrogen_total.csv")
 
 
+# not important anymore
 def curtailment_bar_graph(data_folder_name):
     common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
     common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
@@ -309,9 +309,43 @@ def curtailment_bar_graph(data_folder_name):
     plt.clf()
 
 
+def cycle_bar_graph(data_folder_name):
+    common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
+    vis_folder = mo.path.join(mo.output_path, data_folder_name, "vis")
+
+    cy = pd.read_csv(mo.path.join(common_files_folder, "storage_cycles.csv"), index_col=0)
+
+    x = np.arange(len(cy.columns))
+
+    c = 5
+    plt.bar(x - 0.24, cy.loc["hydro_storage", :], color=colour_list[c], width=.12, label="hydro_storage")
+
+    c = c+1
+    plt.bar(x - .08, cy.loc["battery_storage", :], color=colour_list[c], width=.12, label="battery_storage")
+
+    c = c + 1
+    plt.bar(x + .08, cy.loc["heat_storage", :], color=colour_list[c], width=.12, label="heat_storage")
+
+    c = c+1
+    plt.bar(x + 0.24, cy.loc["hydrogen_storage", :], color=colour_list[c], width=.12, label="hydrogen_storage")
+
+    plt.title("storage cycles")
+    plt.xlabel("CO2 emission in MTons")
+    plt.ylabel("number of cycles in a year")
+    plt.xticks(np.arange(len(cy.columns)), cy.columns, rotation="vertical")
+    plt.legend(fontsize="x-small")
+    # plt.show()
+    plt.savefig(mo.path.join(vis_folder, "cycle_bar" + ".png"), dpi=600)
+    plt.clf()
+
+    vis_ind(cy, "Storage_Cycles", vis_folder, ind=False)
+
+
+
 if __name__ == "__main__":
     # stacked_total_energy_column_graph("fi_4.0.1")
     # vis("fi_4.0", curl=True, cost=True)
+    # vis("fi_4.0", opt_lines=True)
     # opt_line_graph("fi_4.0", heat_opt, "Heat")
     # opt_line_graph("fi_4.0", hydrogen_opt, "Hydrogen")
     # opt_line_graph("fi_4.0", electricity_opt, "Electricity")
@@ -319,5 +353,6 @@ if __name__ == "__main__":
     # opt_line_graph("fi_4.0", storage_opt, "Storage")
     # vis_comparison_ind("fi_4.0.1", comparison_list)
 
+
     # curtailment_bar_graph("fi_4.0.1")
-    # pass
+    pass
