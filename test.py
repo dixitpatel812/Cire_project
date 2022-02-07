@@ -80,7 +80,7 @@ def stores_file(file_name, name_of_col, data_folder_name):
 
 
 if __name__ == "__main__":
-    vis_new("fi_4.0", opt=True)
+    # vis_new("fi_4.0", opt=True)
 
 
 
