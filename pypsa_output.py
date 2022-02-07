@@ -53,7 +53,7 @@ def costs(df, df_t, co2_limit, mc=False, st=False):
         if mc:
             marginal_cost = (df_t.loc[:, j] * df.loc[j, "marginal_cost"]).sum()
             cost.loc[j, co2_limit] = df.loc[j, "capital_cost"] * (
-                        df.loc[j, "p_nom_opt"] - df.loc[j, "p_nom_min"]) + marginal_cost
+                    df.loc[j, "p_nom_opt"] - df.loc[j, "p_nom_min"]) + marginal_cost
         else:
             if st:
                 cost.loc[j, co2_limit] = df.loc[j, "capital_cost"] * (
@@ -91,7 +91,7 @@ def energy(net, energy_list):
     # storage
     for i in energy_list[2]:
         if i in net.stores_t.p.columns:
-            e = mo.hor(e, net.stores_t.p.loc[:, i])
+            e = mo.hor(e, abs(net.stores_t.p.loc[:, i]))
         if i in net.stores_t.e.columns:
             x = pd.DataFrame(index=e.index)
             x = mo.hor(x, net.stores_t.e.loc[:, i])
@@ -100,10 +100,12 @@ def energy(net, energy_list):
     return e
 
 
-def output(data_folder_name: object, start_limit: object = 180, reduction: object = 20, end_limit: object = 0, m_factor: object = 10e5,
+def output(data_folder_name: object, start_limit: object = 180, reduction: object = 20, end_limit: object = 0,
+           m_factor: object = 10e5,
            pypsa_output_data: object = True,
-           ones: object = False) -> object:
+           ones: object = False, GC=True) -> object:
     """
+    :param GC: global constraints available
     :param ones: run only one time
     :param data_folder_name: name of the folder where input files are stored
     :param start_limit: int value (in millions) of maximum allowable limit of total co2 emission in a time period. (Ex: in our case, total CO2 emission in a year 2030 (hourly resolved))
@@ -120,7 +122,7 @@ def output(data_folder_name: object, start_limit: object = 180, reduction: objec
     # # # folder creation / path creation
     # output folder
     output_folder_path = mo.path.join(mo.output_path, data_folder_name)
-    mo.folder_exist_err(mo.output_path, data_folder_name, exist=True)
+    # mo.folder_exist_err(mo.output_path, data_folder_name, exist=True)
     logging.info(" D8 : creating %s folder in output_folder" % data_folder_name)
     if not mo.path.isdir(output_folder_path):
         mo.mkdir(output_folder_path)
@@ -164,9 +166,38 @@ def output(data_folder_name: object, start_limit: object = 180, reduction: objec
         logging.info(f" D8 : simulation of {network_name} at {co2_limit}")
 
         # add global constraint
-        network.add("GlobalConstraint", "CO2_emission_limit", type="primary_energy", carrier_attribute="co2_emissions",
-                    constant=co2_limit * int(m_factor), sense="<=")
+        if GC:
+            network.add("GlobalConstraint", "CO2_emission_limit", type="primary_energy",
+                        carrier_attribute="co2_emissions", constant=co2_limit * int(m_factor), sense="<=")
+
         network.lopf(network.snapshots, solver_name="gurobi_direct")
+
+        if not GC:
+            co2_emission = 0
+            n_re = {"Gas": ['natural_gas', 'steam_reforming', 'heat_boiler_gas'], "Oil": ['heat_boiler_oil', "oil"],
+                    "Lignite": ['lignite_coal'], "Hard_coal": ['hard_coal']}
+
+            for i in n_re.get("Gas"):
+                if i in network.generators_t.p.columns:
+                    co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
+                        "Gas", "co2_emissions"] / network.generators.loc[i, "efficiency"])
+
+            for i in n_re.get("Oil"):
+                if i in network.generators_t.p.columns:
+                    co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
+                        "Oil", "co2_emissions"] / network.generators.loc[i, "efficiency"])
+
+            for i in n_re.get("Lignite"):
+                if i in network.generators_t.p.columns:
+                    co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
+                        "Lignite", "co2_emissions"] / network.generators.loc[i, "efficiency"])
+
+            for i in n_re.get("Hard_coal"):
+                if i in network.generators_t.p.columns:
+                    co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
+                        "Hard_coal", "co2_emissions"] / network.generators.loc[i, "efficiency"])
+
+            return co2_emission
 
         # store output data?
         if pypsa_output_data:
@@ -212,6 +243,7 @@ def output(data_folder_name: object, start_limit: object = 180, reduction: objec
         cost = mo.hor(cost, c)
 
         # remove global constraint
+
         network.remove("GlobalConstraint", "CO2_emission_limit")
 
         # loop condition variable
