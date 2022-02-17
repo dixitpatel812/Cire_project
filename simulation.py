@@ -4,7 +4,7 @@ import d8_output
 import vis
 
 # # mopy
-input_data_folder_name = "R_0_1"
+input_data_folder_name = "R_0_2"
 s_limit = 180
 difference = 20
 # # # #
