@@ -24,6 +24,10 @@ def ver(*x):
     return data
 
 
+def replace_with_space(text):
+    text = text.replace("_", " ")
+    return text
+
 ##############
 # input_data_folder_name = "fi_4.0"
 ##############

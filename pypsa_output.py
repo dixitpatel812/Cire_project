@@ -20,7 +20,8 @@ def opt(net, col_name):
     """
     o = pd.DataFrame()
     o = mo.ver(o, net.generators.loc[:, "p_nom_opt"], net.links.loc[:, "p_nom_opt"], net.stores.loc[:, "e_nom_opt"])
-    o.columns = [str(col_name) + "Mt"]
+    # o.columns = [str(col_name) + "Mt"]
+    o.columns = [str(col_name)]
     return o
 
 
@@ -35,7 +36,8 @@ def file(df, col_name, col_sum=True):
     if col_sum:
         f = df.sum(axis=0)
     f = mo.hor(pd.DataFrame(), f)
-    f.columns = [str(col_name) + "Mt"]
+    # f.columns = [str(col_name) + "Mt"]
+    f.columns = [str(col_name)]
     return f
 
 
@@ -99,6 +101,32 @@ def energy(net, energy_list):
             e = mo.hor(e, x)
     return e
 
+###########################
+
+
+def my_network(input_folder_path):
+    network = Network()
+    network.import_from_csv_folder(input_folder_path)
+    logging.info(" D8 : created %s network " % network_name)
+    return network
+
+
+def my_mkdir(folder, *folder_name, exist_err=False):
+    # folder_path = str()
+    for i in range(len(folder_name)):
+        folder = mo.path.join(folder, folder_name[i])
+        # folder_path = folder + folder_name[i]
+
+    # if exist_err:
+    #     mo.folder_exist_err(folder, folder_path, exist=True)
+    if not mo.path.isdir(folder):
+        mo.mkdir(folder)
+
+    # folder_path = mo.path.join(folder, folder_path)
+
+    return folder
+###########################
+
 
 def output(data_folder_name: object, start_limit: object = 180, reduction: object = 20, end_limit: object = 0,
            m_factor: object = 10e5,
@@ -120,29 +148,39 @@ def output(data_folder_name: object, start_limit: object = 180, reduction: objec
     input_folder_path = mo.path.join(mo.input_path, data_folder_name)
 
     # # # folder creation / path creation
-    # output folder
-    output_folder_path = mo.path.join(mo.output_path, data_folder_name)
+    # creating output folder
+    output_folder_path = my_mkdir(mo.output_path, data_folder_name, exist_err=True)
+    # output_folder_path = mo.path.join(mo.output_path, data_folder_name)
     # mo.folder_exist_err(mo.output_path, data_folder_name, exist=True)
-    logging.info(" D8 : creating %s folder in output_folder" % data_folder_name)
-    if not mo.path.isdir(output_folder_path):
-        mo.mkdir(output_folder_path)
-    # common folder
-    common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
-    if not mo.path.isdir(common_folder):
-        mo.mkdir(common_folder)
+    # logging.info(" D8 : creating %s folder in output_folder" % data_folder_name)
+    # if not mo.path.isdir(output_folder_path):
+    #     mo.mkdir(output_folder_path)
+
+    # creating common folder
+    common_folder = my_mkdir(mo.output_path, data_folder_name, "common")
+
+    # common_folder = mo.path.join(mo.output_path, data_folder_name, "common")
+    # if not mo.path.isdir(common_folder):
+    #     mo.mkdir(common_folder)
+
     # common files folder
-    common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
-    if not mo.path.isdir(common_files_folder):
-        mo.mkdir(common_files_folder)
+    common_files_folder = my_mkdir(mo.output_path, data_folder_name, "common", "files")
+    # common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
+    # if not mo.path.isdir(common_files_folder):
+    #     mo.mkdir(common_files_folder)
+
     # individual folder
-    individual_folder = mo.path.join(mo.output_path, data_folder_name, "individual")
-    if not mo.path.isdir(individual_folder):
-        mo.mkdir(individual_folder)
+    individual_folder = my_mkdir(mo.output_path, data_folder_name, "individual")
+    # individual_folder = mo.path.join(mo.output_path, data_folder_name, "individual")
+    # if not mo.path.isdir(individual_folder):
+    #     mo.mkdir(individual_folder)
+
     # pypsa output folder
-    if pypsa_output_data:
-        pypsa_out_path = mo.path.join(mo.output_path, data_folder_name, "pypsa_out")
-        if not mo.path.isdir(pypsa_out_path):
-            mo.mkdir(pypsa_out_path)
+    pypsa_out_path = my_mkdir(mo.output_path, data_folder_name, "pypsa_out")
+    # if pypsa_output_data:
+    #     pypsa_out_path = mo.path.join(mo.output_path, data_folder_name, "pypsa_out")
+    #     if not mo.path.isdir(pypsa_out_path):
+    #         mo.mkdir(pypsa_out_path)
 
     # creating data frames
     cost = pd.DataFrame()
@@ -172,32 +210,32 @@ def output(data_folder_name: object, start_limit: object = 180, reduction: objec
 
         network.lopf(network.snapshots, solver_name="gurobi_direct")
 
-        if not GC:
-            co2_emission = 0
-            n_re = {"Gas": ['natural_gas', 'steam_reforming', 'heat_boiler_gas'], "Oil": ['heat_boiler_oil', "oil"],
-                    "Lignite": ['lignite_coal'], "Hard_coal": ['hard_coal']}
-
-            for i in n_re.get("Gas"):
-                if i in network.generators_t.p.columns:
-                    co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
-                        "Gas", "co2_emissions"] / network.generators.loc[i, "efficiency"])
-
-            for i in n_re.get("Oil"):
-                if i in network.generators_t.p.columns:
-                    co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
-                        "Oil", "co2_emissions"] / network.generators.loc[i, "efficiency"])
-
-            for i in n_re.get("Lignite"):
-                if i in network.generators_t.p.columns:
-                    co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
-                        "Lignite", "co2_emissions"] / network.generators.loc[i, "efficiency"])
-
-            for i in n_re.get("Hard_coal"):
-                if i in network.generators_t.p.columns:
-                    co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
-                        "Hard_coal", "co2_emissions"] / network.generators.loc[i, "efficiency"])
-
-            return co2_emission
+        # if not GC:
+        #     co2_emission = 0
+        #     n_re = {"Gas": ['natural_gas', 'steam_reforming', 'heat_boiler_gas'], "Oil": ['heat_boiler_oil', "oil"],
+        #             "Lignite": ['lignite_coal'], "Hard_coal": ['hard_coal']}
+        #
+        #     for i in n_re.get("Gas"):
+        #         if i in network.generators_t.p.columns:
+        #             co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
+        #                 "Gas", "co2_emissions"] / network.generators.loc[i, "efficiency"])
+        #
+        #     for i in n_re.get("Oil"):
+        #         if i in network.generators_t.p.columns:
+        #             co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
+        #                 "Oil", "co2_emissions"] / network.generators.loc[i, "efficiency"])
+        #
+        #     for i in n_re.get("Lignite"):
+        #         if i in network.generators_t.p.columns:
+        #             co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
+        #                 "Lignite", "co2_emissions"] / network.generators.loc[i, "efficiency"])
+        #
+        #     for i in n_re.get("Hard_coal"):
+        #         if i in network.generators_t.p.columns:
+        #             co2_emission = co2_emission + (network.generators_t.p.loc[:, i].sum() * network.carriers.loc[
+        #                 "Hard_coal", "co2_emissions"] / network.generators.loc[i, "efficiency"])
+        #
+        #     return co2_emission
 
         # store output data?
         if pypsa_output_data:

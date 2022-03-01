@@ -30,25 +30,25 @@ def vis_ind(data_frame, title, folder_path, ind=True):
     c = 3
     if ind:
         for i in data_frame.index:
-            plt.plot(data_frame.columns, data_frame.loc[i, :], colour_list[c], label=i)
+            plt.plot(data_frame.columns, data_frame.loc[i, :], colour_list[c], label=mo.replace_with_space(i))
             plt.title(title + "  " + i)
             plt.xlabel("CO2_emission limit")
             plt.ylabel("")
             plt.xticks(data_frame.columns, rotation="vertical")
             plt.savefig(mo.path.join(folder_path, title + "_" + i + ".png"), dpi=400)
-            plt.legend(fontsize="xx-small")
+            plt.legend(fontsize="xx-small", loc='upper right', framealpha=0.5)
             plt.clf()
             c = c + 1
     if not ind:
         for i in data_frame.index:
-            plt.plot(data_frame.columns, data_frame.loc[i, :], colour_list[c], label=i)
+            plt.plot(data_frame.columns, data_frame.loc[i, :], colour_list[c], label=mo.replace_with_space(i))
             c = c + 1
         plt.title(title)
-        plt.xlabel("CO2_emission limit")
+        plt.xlabel("CO2_emission cap")
         plt.ylabel("")
         plt.xticks(data_frame.columns, rotation="vertical")
-        plt.legend(fontsize="xx-small")
-        plt.savefig(mo.path.join(folder_path, title + ".png"), dpi=600)
+        plt.legend(fontsize="xx-small", loc='upper right', framealpha=0.5)
+        plt.savefig(mo.path.join(folder_path, title + ".png"), dpi=800)
         plt.clf()
 
 
@@ -155,7 +155,18 @@ def energy_line_graph(data_folder_name, csv_file_name):
     if not mo.path.exists(line_graph_folder):
         mo.mkdir(line_graph_folder)
     energy = updated_energy(data_folder_name, csv_file_name, drooping=True, demand=False, loss=True)
-    vis_ind(energy, csv_file_name[:-4], line_graph_folder, ind=False)
+    # vis_ind(energy, csv_file_name[:-4], line_graph_folder, ind=False)
+    c = 0
+    for i in energy.index:
+        plt.plot(energy.columns, energy.loc[i, :], colour_list[c], label=mo.replace_with_space(i))
+        c = c + 1
+    plt.title(csv_file_name[:-4])
+    plt.xlabel("CO2_emission cap")
+    plt.ylabel("")
+    plt.xticks(energy.columns, rotation="vertical")
+    plt.legend(fontsize="xx-small", loc='upper right', framealpha=0.5)
+    plt.savefig(mo.path.join(line_graph_folder, csv_file_name[:-4] + ".png"), dpi=800)
+    plt.clf()
 
 
 def vis_comparison_ind(data_folder_name, c_list):
@@ -199,14 +210,17 @@ def opt_line_graph(data_folder_name, opt_list, title):
     c = 3
     for m in opt_list:
         if m in opt_file.index:
-            plt.plot(opt_file.columns, opt_file.loc[m, :], colour_list[c], label=m)
+            plt.plot(opt_file.columns, opt_file.loc[m, :], colour_list[c], label=mo.replace_with_space(m))
             c = c + 1
     plt.title(title)
-    plt.xlabel("CO2_emission limit")
-    plt.ylabel("Installed capacity (MW)")
+    plt.xlabel("CO2 emission cap")
+    if "storage" in title:
+        plt.ylabel("Installed capacity [MWh]")
+    else:
+        plt.ylabel("Installed capacity [MW]")
     plt.xticks(opt_file.columns, rotation="vertical")
-    plt.legend(fontsize="xx-small")
-    plt.savefig(mo.path.join(opt_line_graph_folder, title + ".png"), dpi=400)
+    plt.legend(fontsize="xx-small", loc='upper right', framealpha=0.5)
+    plt.savefig(mo.path.join(opt_line_graph_folder, title + ".png"), dpi=800)
     plt.clf()
 
 
@@ -269,16 +283,49 @@ def vis(data_folder_name, cost=False, curl=False, energy=False, opt=False, stack
         stacked_total_energy_column_graph(data_folder_name)
 
     if opt_lines:
-        opt_line_graph(data_folder_name, heat_opt, "Heat")
-        opt_line_graph(data_folder_name, hydrogen_opt, "Hydrogen")
-        opt_line_graph(data_folder_name, electricity_opt, "Electricity")
-        opt_line_graph(data_folder_name, electricity_opt_other, "Electricity_other")
-        opt_line_graph(data_folder_name, storage_opt, "Storage")
+        opt_line_graph(data_folder_name, heat_opt, "Power associated with heat in 2030")
+        opt_line_graph(data_folder_name, hydrogen_opt, "Power associated with hydrogen in 2030")
+        opt_line_graph(data_folder_name, electricity_opt, "Power associated with electricity in 2030")
+        opt_line_graph(data_folder_name, electricity_opt_other, "Huge Power associated with electricity in 2030")
+        opt_line_graph(data_folder_name, storage_opt, "Energy associated with storage in 2030")
 
     if energy_lines:
         energy_line_graph(data_folder_name, "electricity_total.csv")
         energy_line_graph(data_folder_name, "heat_total.csv")
         energy_line_graph(data_folder_name, "hydrogen_total.csv")
+
+
+def cycle_bar_graph(data_folder_name):
+    common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
+    vis_folder = mo.path.join(mo.output_path, data_folder_name, "vis")
+
+    cy = pd.read_csv(mo.path.join(common_files_folder, "storage_cycles.csv"), index_col=0)
+
+    x = np.arange(len(cy.columns))
+
+    c = 5
+    plt.bar(x - 0.24, cy.loc["hydro_storage", :], color=colour_list[c], width=.12, label=mo.replace_with_space("hydro_storage"))
+
+    c = c+1
+    plt.bar(x - .08, cy.loc["battery_storage", :], color=colour_list[c], width=.12, label=mo.replace_with_space("battery_storage"))
+
+    c = c + 1
+    plt.bar(x + .08, cy.loc["heat_storage", :], color=colour_list[c], width=.12, label=mo.replace_with_space("heat_storage"))
+
+    c = c+1
+    plt.bar(x + 0.24, cy.loc["hydrogen_storage", :], color=colour_list[c], width=.12, label=mo.replace_with_space("hydrogen_storage"))
+
+    plt.title("Storage Cycles in 2030")
+    plt.xlabel("CO2 emission cap [MTons]")
+    plt.ylabel("Number of stored energy cycles")
+    plt.xticks(np.arange(len(cy.columns)), cy.columns, rotation="vertical")
+    plt.legend(fontsize="xx-small", loc='upper right', framealpha=0.5)
+    # plt.show()
+    plt.savefig(mo.path.join(vis_folder, "cycle_bar" + ".png"), dpi=800)
+    plt.clf()
+
+    # line graph
+    vis_ind(cy, "Storage_Cycles", vis_folder, ind=False)
 
 
 # not important anymore
@@ -307,39 +354,6 @@ def curtailment_bar_graph(data_folder_name):
     # plt.show()
     plt.savefig(mo.path.join(common_folder, "curtailment_bar" + ".png"), dpi=600)
     plt.clf()
-
-
-def cycle_bar_graph(data_folder_name):
-    common_files_folder = mo.path.join(mo.output_path, data_folder_name, "common", "files")
-    vis_folder = mo.path.join(mo.output_path, data_folder_name, "vis")
-
-    cy = pd.read_csv(mo.path.join(common_files_folder, "storage_cycles.csv"), index_col=0)
-
-    x = np.arange(len(cy.columns))
-
-    c = 5
-    plt.bar(x - 0.24, cy.loc["hydro_storage", :], color=colour_list[c], width=.12, label="hydro_storage")
-
-    c = c+1
-    plt.bar(x - .08, cy.loc["battery_storage", :], color=colour_list[c], width=.12, label="battery_storage")
-
-    c = c + 1
-    plt.bar(x + .08, cy.loc["heat_storage", :], color=colour_list[c], width=.12, label="heat_storage")
-
-    c = c+1
-    plt.bar(x + 0.24, cy.loc["hydrogen_storage", :], color=colour_list[c], width=.12, label="hydrogen_storage")
-
-    plt.title("storage cycles")
-    plt.xlabel("CO2 emission in MTons")
-    plt.ylabel("number of cycles in a year")
-    plt.xticks(np.arange(len(cy.columns)), cy.columns, rotation="vertical")
-    plt.legend(fontsize="x-small")
-    # plt.show()
-    plt.savefig(mo.path.join(vis_folder, "cycle_bar" + ".png"), dpi=600)
-    plt.clf()
-
-    vis_ind(cy, "Storage_Cycles", vis_folder, ind=False)
-
 
 
 if __name__ == "__main__":
